@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security6">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SocialHub - Home</title>
+  <link th:href="@{/css/main.css}" rel="stylesheet"/>
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
+
+  <!-- Custom styles for scrollable posts -->
+  <style>
+    .post-content-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: #d1d5db #f9fafb;
+    }
+    
+    .post-content-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .post-content-scroll::-webkit-scrollbar-track {
+      background: #f9fafb;
+      border-radius: 3px;
+    }
+    
+    .post-content-scroll::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 3px;
+    }
+    
+    .post-content-scroll::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+    
+    .post-content-scroll {
+      scroll-behavior: smooth;
+    }
+  </style>
+
+  <!-- CSRF Token for AJAX requests -->
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+  
+</head>
+
+<body class="text-white bg-brand-50">
+
+<!-- Hidden input to store current user email for JavaScript -->
+<input type="hidden" id="currentUserEmail" th:value="${#authentication.name}" sec:authorize="isAuthenticated()">
+
+<!-- Flash Messages -->
+<div th:if="${error}" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg max-w-md">
+  <div class="flex items-center">
+    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+    <span th:text="${error}">Error message</span>
+  </div>
+</div>
+
+<div th:if="${success}" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg max-w-md">
+  <div class="flex items-center">
+    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+    <span th:text="${success}">Success message</span>
+  </div>
+</div>
+
+<div th:replace="~{components/navbar :: navbar}"></div>
+
+<div class="flex flex-col justify-between lg:flex-row min-h-screen mt-6">
+
+  <aside class="hidden lg:block ml-10 sticky top-20 self-start h-[calc(100vh-5rem)] overflow-y-auto">
+    <div th:replace="~{components/profile-sidebar :: profileSidebar}"></div>
+  </aside>
+
+  <!-- Main Feed -->
+  <main class="flex-1 max-w-2xl mx-auto px-6">
+    <div th:replace="~{components/feed :: feed}"></div>
+  </main>
+
+  <!-- Right Sidebar (Desktop only) -->
+  <aside class="hidden lg:block mr-10 sticky top-20 self-start h-[calc(100vh-5rem)] overflow-y-auto">
+    <div th:replace="~{components/right-sidebar :: rightSidebar}"></div>
+  </aside>
+</div>
+
+
+
+
+<script>
+  // CSRF setup for AJAX
+  const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+  const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+  // Auto-hide flash messages
+  document.addEventListener('DOMContentLoaded', function() {
+    const flashMessages = document.querySelectorAll('.fixed.top-4');
+    flashMessages.forEach(function(message) {
+      setTimeout(function() {
+        message.style.transition = 'opacity 0.5s ease-out';
+        message.style.opacity = '0';
+        setTimeout(function() {
+          message.remove();
+        }, 500);
+      }, 5000); // Hide after 5 seconds
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Character counter for post textarea
+    const textarea = document.querySelector('textarea[name="content"]');
+    const charCounter = document.getElementById("charCounter");
+    const postForm = document.querySelector('form[action*="/posts"]');
+    const postButton = document.querySelector('form[action*="/posts"] button[type="submit"]');
+    
+    if (textarea && charCounter) {
+      // Set initial button state
+      if (postButton) {
+        postButton.disabled = true;
+        postButton.classList.add('opacity-50', 'cursor-not-allowed');
+        postButton.title = 'Please write something before posting.';
+      }
+      
+      textarea.addEventListener('input', function() {
+        const count = this.value.length;
+        charCounter.textContent = count + '/280 Characters';
+        
+        // Update submit button state
+        if (postButton) {
+          if (count > 280) {
+            charCounter.classList.add('text-red-400');
+            charCounter.classList.remove('text-gray-700');
+            postButton.disabled = true;
+            postButton.classList.add('opacity-50', 'cursor-not-allowed');
+            postButton.title = 'Post is too long. Please reduce to 280 characters or less.';
+          } else if (count === 0) {
+            charCounter.classList.add('text-gray-700');
+            charCounter.classList.remove('text-red-400');
+            postButton.disabled = true;
+            postButton.classList.add('opacity-50', 'cursor-not-allowed');
+            postButton.title = 'Please write something before posting.';
+          } else {
+            charCounter.classList.add('text-gray-700');
+            charCounter.classList.remove('text-red-400');
+            postButton.disabled = false;
+            postButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            postButton.title = '';
+          }
+        }
+      });
+    }
+    
+    // Add form submission validation
+    if (postForm) {
+      postForm.addEventListener('submit', function(e) {
+        const content = textarea ? textarea.value.trim() : '';
+        
+        if (content === '') {
+          e.preventDefault();
+          showNotification('Post content cannot be empty. Please write something before posting.', 'error');
+          return false;
+        }
+        
+        if (content.length > 280) {
+          e.preventDefault();
+          showNotification('Post content is too long. Please keep it under 280 characters.', 'error');
+          return false;
+        }
+        
+        // Disable submit button to prevent double submission
+        if (postButton) {
+          postButton.disabled = true;
+          postButton.innerHTML = '<span class="loading loading-spinner loading-xs"></span> Posting...';
+        }
+      });
+    }
+
+    // Initialize like buttons and comment functionality
+    initializePostInteractions();
+  });
+
+  // Function to initialize post interactions
+  function initializePostInteractions() {
+    // Get all posts
+    const posts = document.querySelectorAll('.post-card');
+    
+    posts.forEach(post => {
+      const postId = post.dataset.postId;
+      const likeButton = post.querySelector('.like-button');
+      const commentButton = post.querySelector('.comment-button');
+      const deleteButton = post.querySelector('.delete-post-button');
+
+      // Initialize like count and status
+      fetchLikeStatus(postId, likeButton);
+      
+      likeButton.addEventListener('click', () => toggleLike(postId, likeButton));
+      
+      commentButton.addEventListener('click', () => openCommentModal(postId));
+
+      if (deleteButton) {
+        deleteButton.addEventListener('click', () => deletePost(postId));
+      }
+    });
+    
+    document.getElementById('closeCommentModal').addEventListener('click', closeCommentModal);
+    
+    document.getElementById('commentForm').addEventListener('submit', submitComment);
+    
+    document.getElementById('commentModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeCommentModal();
+      }
+    });
+  }
+
+  // Function to fetch and update like status
+  function fetchLikeStatus(postId, likeButton) {
+    // Add user context to the request to ensure proper user-specific status
+    const currentUser = getCurrentUserEmail();
+    if (!currentUser) {
+      console.error('No current user found for like status check');
+      return;
+    }
+
+    fetch(`/api/likes/${postId}/status`, {
+      method: 'GET',
+      headers: {
+        [csrfHeader]: csrfToken,
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log(`Fetching like status for post ${postId}: user=${currentUser}, liked=${data.liked}, count=${data.likeCount}`);
+        updateLikeButton(likeButton, data.liked, data.likeCount);
+      })
+      .catch(error => {
+        console.error('Error fetching like status:', error);
+        // Set default state on error
+        updateLikeButton(likeButton, false, 0);
+      });
+  }
+
+  // Function to toggle like
+  function toggleLike(postId, likeButton) {
+    fetch(`/api/likes/${postId}`, {
+      method: 'POST',
+      headers: {
+        [csrfHeader]: csrfToken
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        updateLikeButton(likeButton, data.liked, data.likeCount);
+      })
+      .catch(error => console.error('Error toggling like:', error));
+  }
+
+  // Function to update like button appearance
+  function updateLikeButton(button, isLiked, likeCount) {
+    const countSpan = button.querySelector('.like-count');
+    countSpan.textContent = likeCount;
+    
+    // Debug logging to help identify the issue
+    const postId = button.closest('.post-card').dataset.postId;
+    console.log(`Post ${postId}: isLiked=${isLiked}, likeCount=${likeCount}, currentUser=${getCurrentUserEmail()}`);
+
+    // Update the heart icon and color
+    const svg = button.querySelector('svg');
+    
+    if (isLiked) {
+      button.classList.add('text-red-500');
+      button.classList.remove('text-gray-400');
+      svg.setAttribute('fill', 'currentColor');
+      svg.setAttribute('stroke', 'none');
+    } else {
+      button.classList.remove('text-red-500');
+      button.classList.add('text-gray-400');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', 'currentColor');
+    }
+  }
+
+  // Function to open comment modal
+  function openCommentModal(postId) {
+    const modal = document.getElementById('commentModal');
+    document.getElementById('postIdInput').value = postId;
+    modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+    
+    // Fetch post details - FIX: Use correct CSS selectors for light theme
+    const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+    const authorName = postCard.querySelector('h3').textContent;
+    const postTime = postCard.querySelector('.text-sm.text-gray-400').textContent;
+    const postContent = postCard.querySelector('p.text-gray-700').textContent; // Changed from text-gray-300 to text-gray-700
+
+    // Update modal content
+    document.getElementById('modalPostAuthor').textContent = authorName;
+    document.getElementById('modalPostTime').textContent = postTime;
+    document.getElementById('modalPostText').textContent = postContent;
+    
+    // Update modal avatar with post author's profile picture
+    const modalAvatarContainer = document.querySelector('#modalPostContent .avatar > div');
+    const postAvatar = postCard.querySelector('.avatar img');
+    
+    if (postAvatar) {
+        // Post author has a profile picture
+        modalAvatarContainer.innerHTML = `<img src="${postAvatar.src}" alt="Profile" class="object-cover w-full h-full rounded-full"/>`;
+    } else {
+        // Use default avatar
+        modalAvatarContainer.innerHTML = `<svg class="mt-2 ml-[10px] w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+        </svg>`;
+    }
+    
+    // Fetch comments IMMEDIATELY when modal opens
+    fetchComments(postId);
+  }
+
+  // Function to close comment modal
+  function closeCommentModal() {
+    const modal = document.getElementById('commentModal');
+    modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+    document.getElementById('commentContent').value = '';
+  }
+
+  // Function to fetch comments
+  function fetchComments(postId) {
+    const commentsList = document.getElementById('commentsList');
+    commentsList.innerHTML = '<div class="flex justify-center"><div class="w-6 h-6 border-b-2 rounded-full animate-spin border-brand-400"></div></div>';
+    
+    fetch(`/api/comments/${postId}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(comments => {
+        console.log("Comments loaded:", comments);
+        if (!comments || comments.length === 0) {
+          commentsList.innerHTML = '<p class="text-center text-gray-500">No comments yet. Be the first to comment!</p>';
+          return;
+        }
+        
+        commentsList.innerHTML = '';
+        comments.forEach(comment => {
+          const commentElement = createCommentElement(comment);
+          commentsList.appendChild(commentElement);
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching comments:', error);
+        commentsList.innerHTML = '<p class="text-center text-red-400">Failed to load comments. Please try again.</p>';
+      });
+  }
+
+ // Fix the createCommentElement function
+function createCommentElement(comment) {
+    const div = document.createElement('div');
+    div.className = 'flex items-start gap-3 p-3 bg-gray-100 rounded-lg';
+
+    let formattedDate;
+    try {
+      formattedDate = new Date(comment.createdAt).toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+      formattedDate = 'Unknown date';
+      console.error('Date formatting error:', e);
+    }
+    
+    // Handle potentially missing user data
+    const firstName = comment.user && comment.user.firstName ? comment.user.firstName : 'Unknown';
+    const lastName = comment.user && comment.user.lastName ? comment.user.lastName : 'User';
+    
+    // Get current user info from the post card
+    const currentUserEmail = document.querySelector('meta[name="_csrf"]') ?
+      getCurrentUserEmail() : '';
+
+    // Determine if current user can delete this comment
+    const isCommentOwner = comment.user && comment.user.email === currentUserEmail;
+    const isPostOwner = comment.post && comment.post.user && comment.post.user.email === currentUserEmail;
+    const canDelete = isCommentOwner || isPostOwner;
+
+    const deleteButtonHTML = canDelete ? `
+      <button onclick="deleteComment(${comment.id}, ${comment.post.id})"
+              class="ml-2 text-xs text-gray-400 hover:text-red-400"
+              title="Delete comment">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+      </button>
+    ` : '';
+
+    // Create avatar HTML with conditional profile picture
+    const profilePicture = comment.user && comment.user.profilePicture && comment.user.profilePicture.trim() !== '';
+    const avatarHTML = profilePicture ? 
+      `<img src="${comment.user.profilePicture}" alt="Profile" class="object-cover w-full h-full rounded-full"/>` :
+      `<svg class="mt-2 ml-2 w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+       </svg>`;
+
+    div.innerHTML = `
+      <div class="avatar">
+        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-brand-300">
+          ${avatarHTML}
+        </div>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <h5 class="font-medium text-gray-900">${firstName} ${lastName}</h5>
+            <span class="text-xs text-gray-700">${formattedDate}</span>
+          </div>
+          ${deleteButtonHTML}
+        </div>
+
+        <p class="text-sm text-gray-700 mt-1">${comment.content}</p>
+
+      </div>
+    `;
+    
+    return div;
+}
+
+// Helper function to get current user email
+function getCurrentUserEmail() {
+    const currentUserEmailInput = document.getElementById('currentUserEmail');
+    if (currentUserEmailInput && currentUserEmailInput.value) {
+        return currentUserEmailInput.value;
+    }
+
+    return '';
+}
+
+  // Function to delete a post
+  function deletePost(postId) {
+    if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+      return;
+    }
+
+    fetch(`/api/posts/${postId}`, {
+      method: 'DELETE',
+      headers: {
+        [csrfHeader]: csrfToken
+      }
+    })
+      .then(response => {
+        if (response.ok) {
+          // Remove the post from the DOM
+          const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+          if (postCard) {
+            postCard.remove();
+          }
+          showNotification('Post deleted successfully!', 'success');
+        } else {
+          response.text().then(text => {
+            showNotification(text || 'Error deleting post', 'error');
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error deleting post:', error);
+        showNotification('Error deleting post. Please try again.', 'error');
+      });
+  }
+
+  // Function to delete a comment
+  function deleteComment(commentId, postId) {
+    if (!confirm('Are you sure you want to delete this comment?')) {
+      return;
+    }
+
+    fetch(`/api/comments/${commentId}`, {
+      method: 'DELETE',
+      headers: {
+        [csrfHeader]: csrfToken
+      }
+    })
+      .then(response => {
+        if (response.ok) {
+          // Refresh comments list
+          fetchComments(postId);
+          showNotification('Comment deleted successfully!', 'success');
+        } else {
+          response.text().then(text => {
+            showNotification(text || 'Error deleting comment', 'error');
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error deleting comment:', error);
+        showNotification('Error deleting comment. Please try again.', 'error');
+      });
+  }
+
+  // Function to show notification
+  function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white ${
+      type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+    notification.textContent = message;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+
+  // Function to submit comment
+  function submitComment(e) {
+    e.preventDefault();
+    
+    const postId = document.getElementById('postIdInput').value;
+    const content = document.getElementById('commentContent').value.trim();
+    
+    if (!content) return;
+    
+    const submitButton = this.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="loading loading-spinner loading-xs"></span> Posting...';
+    
+    fetch(`/api/comments/${postId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        [csrfHeader]: csrfToken
+      },
+      body: JSON.stringify({ content })
+    })
+      .then(response => response.json())
+      .then(comment => {
+        document.getElementById('commentContent').value = '';
+        fetchComments(postId);
+        submitButton.disabled = false;
+        submitButton.textContent = 'Post Comment';
+      })
+      .catch(error => {
+        console.error('Error posting comment:', error);
+        submitButton.disabled = false;
+        submitButton.textContent = 'Post Comment';
+      });
+  }
+
+  // Function to open profile settings modal
+  function openProfileSettingsModal() {
+    const modal = document.getElementById('profileSettingsModal');
+    
+    // Load current user data to pre-populate the form
+    fetch('/profile/current')
+      .then(response => response.json())
+      .then(data => {
+        console.log('=== Loading current user data ===');
+        console.log('Current user data:', data);
+        document.getElementById('firstName').value = data.firstName || '';
+        document.getElementById('lastName').value = data.lastName || '';
+        document.getElementById('email').value = data.email || '';
+        document.getElementById('password').value = '';
+        document.getElementById('city').value = data.city || '';
+        document.getElementById('country').value = data.country || '';
+        document.getElementById('education').value = data.education || '';
+        document.getElementById('workplace').value = data.workplace || '';
+        console.log('Form populated with current data');
+      })
+      .catch(error => {
+        console.error('Error loading user data:', error);
+      });
+    
+    modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+  }
+
+  // Function to close profile settings modal
+  function closeProfileSettingsModal() {
+    const modal = document.getElementById('profileSettingsModal');
+    modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+    
+    // Clear file input and preview
+    document.getElementById('profilePicture').value = '';
+    document.getElementById('imagePreview').classList.add('hidden');
+  }
+
+  // Function to handle AJAX profile update
+  function updateProfileAjax(event) {
+    event.preventDefault();
+    
+    // Create FormData to handle file upload
+    const formData = new FormData();
+    formData.append('firstName', document.getElementById('firstName').value);
+    formData.append('lastName', document.getElementById('lastName').value);
+    formData.append('email', document.getElementById('email').value);
+    formData.append('password', document.getElementById('password').value);
+    formData.append('city', document.getElementById('city').value);
+    formData.append('country', document.getElementById('country').value);
+    formData.append('education', document.getElementById('education').value);
+    formData.append('workplace', document.getElementById('workplace').value);
+    
+    // Add profile picture file if selected
+    const profilePictureFile = document.getElementById('profilePicture').files[0];
+    if (profilePictureFile) {
+      formData.append('profilePictureFile', profilePictureFile);
+    }
+    
+    console.log('=== Submitting profile update ===');
+    console.log('Form data prepared with file:', profilePictureFile ? profilePictureFile.name : 'No file selected');
+    
+    // Get CSRF token
+    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+    
+    fetch('/profile/update-ajax', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': csrfToken
+      },
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('=== Profile update response ===');
+      console.log('Response data:', data);
+      
+      if (data.success) {
+        console.log('Update successful, user data:', data.user);
+        // Update UI elements with new user data
+        updateUIWithUserData(data.user);
+        
+        // Refresh user stats
+        refreshUserStats();
+        
+        // Show success message
+        showNotification('Profile updated successfully!', 'success');
+        
+        // Close modal
+        closeProfileSettingsModal();
+        
+        // Clear the file input
+        document.getElementById('profilePicture').value = '';
+      } else {
+        console.log('Update failed:', data.message);
+        showNotification(data.message || 'Failed to update profile', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error updating profile:', error);
+      showNotification('Failed to update profile. Please try again.', 'error');
+    });
+  }
+
+  // Function to update UI elements with new user data
+  function updateUIWithUserData(userData) {
+    console.log('=== Updating UI with user data ===');
+    console.log('User data received:', userData);
+    
+    // Update profile sidebar name
+    const profileName = document.querySelector('[data-user-name]');
+    if (profileName) {
+      profileName.textContent = `${userData.firstName} ${userData.lastName}`;
+      console.log('✅ Updated profile name to:', profileName.textContent);
+    } else {
+      console.log('❌ Profile name element not found');
+    }
+    
+    // Update username display
+    const usernameElement = document.querySelector('[data-user-username]');
+    if (usernameElement) {
+      usernameElement.textContent = `@${userData.username}`;
+      console.log('✅ Updated username to:', usernameElement.textContent);
+    } else {
+      console.log('❌ Username element not found');
+    }
+    
+    // Update email display
+    const emailElement = document.querySelector('[data-user-email]');
+    if (emailElement) {
+      emailElement.textContent = userData.email;
+      console.log('✅ Updated email to:', emailElement.textContent);
+    } else {
+      console.log('❌ Email element not found');
+    }
+
+    // Update location display
+    const locationElement = document.querySelector('[data-user-location]');
+    const locationSpan = locationElement?.querySelector('span');
+    if (locationElement && locationSpan) {
+      if (userData.city || userData.country) {
+        let locationText = '';
+        if (userData.city) locationText += userData.city;
+        if (userData.country && userData.city) locationText += ', ';
+        if (userData.country) locationText += userData.country;
+        locationSpan.textContent = locationText;
+        locationElement.style.display = 'flex';
+        console.log('✅ Updated location to:', locationText);
+      } else {
+        locationElement.style.display = 'none';
+        console.log('✅ Hidden location (no data)');
+      }
+    }
+
+    // Update education display
+    const educationElement = document.querySelector('[data-user-education]');
+    const educationSpan = educationElement?.querySelector('span');
+    if (educationElement && educationSpan) {
+      if (userData.education && userData.education.trim() !== '') {
+        educationSpan.textContent = `Studies at ${userData.education}`;
+        educationElement.style.display = 'flex';
+        console.log('✅ Updated education to:', educationSpan.textContent);
+      } else {
+        educationElement.style.display = 'none';
+        console.log('✅ Hidden education (no data)');
+      }
+    }
+
+    // Update workplace display
+    const workplaceElement = document.querySelector('[data-user-workplace]');
+    const workplaceSpan = workplaceElement?.querySelector('span');
+    if (workplaceElement && workplaceSpan) {
+      if (userData.workplace && userData.workplace.trim() !== '') {
+        workplaceSpan.textContent = `Works at ${userData.workplace}`;
+        workplaceElement.style.display = 'flex';
+        console.log('✅ Updated workplace to:', workplaceSpan.textContent);
+      } else {
+        workplaceElement.style.display = 'none';
+        console.log('✅ Hidden workplace (no data)');
+      }
+    }
+
+    // Update profile picture if it exists
+    const profileImg = document.getElementById('profile-picture-img');
+    const defaultIcon = document.getElementById('profile-default-icon');
+    const avatarContainer = document.getElementById('profile-avatar-container');
+    
+    if (userData.profilePicture && userData.profilePicture.trim() !== '') {
+      // Show profile picture, hide default icon
+      if (profileImg) {
+        profileImg.src = userData.profilePicture;
+        profileImg.style.display = 'block';
+      } else if (avatarContainer) {
+        // Create img element if it doesn't exist
+        const newImg = document.createElement('img');
+        newImg.id = 'profile-picture-img';
+        newImg.src = userData.profilePicture;
+        newImg.alt = 'Profile';
+        newImg.className = 'w-full h-full rounded-full object-cover';
+        avatarContainer.appendChild(newImg);
+      }
+      if (defaultIcon) defaultIcon.style.display = 'none';
+      console.log('✅ Updated profile picture');
+    } else {
+      // Hide profile picture, show default icon
+      if (profileImg) profileImg.style.display = 'none';
+      if (defaultIcon) defaultIcon.style.display = 'block';
+      console.log('✅ Using default profile icon');
+    }
+    
+    // Update any other name displays in the UI
+    const nameDisplays = document.querySelectorAll('[data-user-name]');
+    nameDisplays.forEach(element => {
+      element.textContent = `${userData.firstName} ${userData.lastName}`;
+    });
+    
+    console.log('=== UI Update Complete ===');
+  }
+
+  // Function to refresh user stats
+  function refreshUserStats() {
+    console.log('=== Refreshing user stats ===');
+    
+    // Get CSRF token
+    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+    
+    fetch('/api/user/stats', {
+      method: 'GET',
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Stats refreshed:', data);
+      
+      // Update stats in the sidebar
+      const statsElements = document.querySelectorAll('.stat-value');
+      if (statsElements.length >= 3) {
+        statsElements[0].textContent = data.formattedPostsCount;
+        statsElements[1].textContent = data.formattedFriendsCount;
+        statsElements[2].textContent = data.formattedLikesCount;
+        console.log('✅ Updated stats display');
+      }
+    })
+    .catch(error => {
+      console.error('Error refreshing stats:', error);
+    });
+  }
+
+  // Debug function to test UI elements
+  function testUIElements() {
+    console.log('=== Testing UI Elements ===');
+    console.log('Profile name element:', document.querySelector('[data-user-name]'));
+    console.log('Username element:', document.querySelector('[data-user-username]'));
+    console.log('Email element:', document.querySelector('[data-user-email]'));
+    
+    // Test updating manually
+    const testData = {
+      firstName: 'Test',
+      lastName: 'User',
+      username: 'testuser',
+      email: 'test@example.com'
+    };
+    console.log('Testing with data:', testData);
+    updateUIWithUserData(testData);
+  }
+
+  // Function to preview selected profile image
+  function previewProfileImage(input) {
+    const preview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        previewImg.src = e.target.result;
+        preview.classList.remove('hidden');
+      };
+      
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      preview.classList.add('hidden');
+    }
+  }
+
+  // Friend request functionality for right sidebar
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners to all Add buttons in right sidebar
+    const addFriendButtons = document.querySelectorAll('.add-friend-btn');
+    
+    addFriendButtons.forEach(button => {
+      button.addEventListener('click', async function() {
+        const userId = this.getAttribute('data-user-id');
+        const buttonElement = this;
+        
+        try {
+          // Show loading state
+          buttonElement.disabled = true;
+          buttonElement.textContent = 'Sending...';
+          
+          const response = await fetch('/api/friends/request', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: new URLSearchParams({
+              'receiverId': userId
+            })
+          });
+          
+          if (response.ok) {
+            // Show success notification
+            showNotification('Friend request sent successfully!', 'success');
+            
+            // Update button state
+            buttonElement.textContent = 'Sent';
+            buttonElement.disabled = true;
+            buttonElement.classList.remove('!bg-brand-500', '!border-brand-500');
+            buttonElement.classList.add('!bg-gray-400', '!border-gray-400');
+            
+          } else {
+            const errorText = await response.text();
+            showNotification(errorText || 'Failed to send friend request', 'error');
+            
+            // Reset button state
+            buttonElement.disabled = false;
+            buttonElement.textContent = 'Add';
+          }
+        } catch (error) {
+          console.error('Error sending friend request:', error);
+          showNotification('Error sending friend request', 'error');
+          
+          // Reset button state
+          buttonElement.disabled = false;
+          buttonElement.textContent = 'Add';
+        }
+      });
+    });
+  });
+
+  // Notification system for home page
+  function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transition-all duration-300 ${
+      type === 'success' ? 'bg-green-500 text-white' :
+      type === 'error' ? 'bg-red-500 text-white' :
+      'bg-blue-500 text-white'
+    }`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+
+  // Emoji Picker Functions
+  function toggleEmojiPicker() {
+    const emojiPicker = document.getElementById('emojiPicker');
+    emojiPicker.classList.toggle('hidden');
+    
+    // Close emoji picker when clicking outside
+    if (!emojiPicker.classList.contains('hidden')) {
+      document.addEventListener('click', function closeEmojiPicker(e) {
+        if (!emojiPicker.contains(e.target) && !document.getElementById('emojiButton').contains(e.target)) {
+          emojiPicker.classList.add('hidden');
+          document.removeEventListener('click', closeEmojiPicker);
+        }
+      });
+    }
+  }
+
+  function showEmojiCategory(category) {
+    // Hide all emoji categories
+    const categories = document.querySelectorAll('.emoji-category');
+    categories.forEach(cat => cat.classList.add('hidden'));
+    
+    // Show selected category
+    const selectedCategory = document.querySelector(`[data-category="${category}"]`);
+    if (selectedCategory) {
+      selectedCategory.classList.remove('hidden');
+    }
+    
+    // Update tab appearance
+    const tabs = document.querySelectorAll('.tabs .tab');
+    tabs.forEach(tab => tab.classList.remove('tab-active'));
+    
+    const activeTab = document.querySelector(`[data-category="${category}"]`);
+    if (activeTab && activeTab.classList.contains('tab')) {
+      activeTab.classList.add('tab-active');
+    }
+  }
+
+  function insertEmoji(emoji) {
+    const textarea = document.querySelector('textarea[name="content"]');
+    if (textarea) {
+      const cursorPosition = textarea.selectionStart;
+      const textBefore = textarea.value.substring(0, cursorPosition);
+      const textAfter = textarea.value.substring(cursorPosition);
+      
+      // Insert emoji at cursor position
+      textarea.value = textBefore + emoji + textAfter;
+      
+      // Move cursor after the inserted emoji
+      const newCursorPosition = cursorPosition + emoji.length;
+      textarea.setSelectionRange(newCursorPosition, newCursorPosition);
+      
+      // Focus back to textarea
+      textarea.focus();
+      
+      // Trigger input event to update character counter
+      const inputEvent = new Event('input', { bubbles: true });
+      textarea.dispatchEvent(inputEvent);
+      
+      // Hide emoji picker after selection
+      document.getElementById('emojiPicker').classList.add('hidden');
+    }
+  }
+
+  // Close emoji picker when pressing Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const emojiPicker = document.getElementById('emojiPicker');
+      if (!emojiPicker.classList.contains('hidden')) {
+        emojiPicker.classList.add('hidden');
+      }
+    }
+  });
+</script>
+
+<!-- Profile Settings Modal -->
+<div id="profileSettingsModal" class="fixed inset-0 z-50 hidden">
+  <div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onclick="closeProfileSettingsModal()"></div>
+  <div class="relative flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+      <div class="flex items-center justify-between p-6 pb-4 border-b border-gray-300">
+        <h2 class="text-xl font-bold text-black">Edit Profile</h2>
+        <button onclick="closeProfileSettingsModal()" class="text-gray-700 hover:text-black">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto max-h-[calc(90vh-140px)]">
+
+        <form id="profileForm" onsubmit="updateProfileAjax(event)" class="pb-4 pt-2 px-4 space-y-4">
+          <!-- CSRF Token -->
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" name="_csrf"/>
+          
+          <!-- Basic Information Section -->
+          <div class="">
+            <h3 class="pb-2 text-lg font-medium text-gray-900 border-b border-gray-300">Basic Information</h3>
+            
+            <!-- Name Fields -->
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label for="firstName" class="block mb-1 text-sm font-medium text-gray-700">First Name</label>
+                <input type="text" id="firstName" name="firstName" 
+                       class="w-full px-3 py-2 text-sm text-black bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       required>
+              </div>
+              <div>
+                <label for="lastName" class="block mb-1 text-sm font-medium text-gray-700">Last Name</label>
+                <input type="text" id="lastName" name="lastName" 
+                       class="w-full px-3 py-2 text-sm text-black bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       required>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label for="email" class="block mb-1 text-sm font-medium text-gray-700">Email</label>
+              <input type="email" id="email" name="email" 
+                     class="w-full px-3 py-2 text-sm text-black bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                     required>
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label for="password" class="block mb-1 text-sm font-medium text-gray-700">New Password</label>
+              <input type="password" id="password" name="password" 
+                     class="w-full px-3 py-2 text-sm text-black bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                     placeholder="Leave blank to keep current password">
+              <p class="mt-1 text-xs text-gray-700">Optional - only fill if you want to change your password</p>
+            </div>
+          </div>
+
+          <!-- Profile Picture Section -->
+          <div class="space-y-4">
+            <h3 class="pb-2 text-lg font-medium text-gray-900 border-b border-gray-300">Profile Picture</h3>
+            
+            <div class="flex items-start gap-4">
+              <div class="flex-1">
+                <input type="file" id="profilePicture" name="profilePicture" accept="image/*" onchange="previewProfileImage(this)"
+                       class="w-full px-3 py-2 text-sm text-gray-700 bg-gray-100 border border-gray-300 rounded-md focus:outline-none
+                        focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium
+                       file:bg-brand-600 file:text-white transition-transform hover:scale-105 hover:file:bg-brand-700">
+                <p class="mt-1 text-xs text-gray-400">JPG, PNG, GIF (max 10MB)</p>
+              </div>
+              <div id="imagePreview" class="hidden">
+                <img id="previewImg" src="" alt="Preview" class="object-cover w-16 h-16 border-2 border-gray-300 rounded-full">
+              </div>
+            </div>
+          </div>
+
+          <!-- Location & Background Section -->
+          <div class="space-y-4">
+            <h3 class="pb-2 text-lg font-medium text-gray-900 border-b border-gray-300">Location & Background</h3>
+            
+            <!-- Location Fields -->
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label for="city" class="block mb-1 text-sm font-medium text-gray-700">
+                  <svg class="inline w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                  </svg>
+                  City
+                </label>
+                <input type="text" id="city" name="city" 
+                       class="w-full px-3 py-2 text-sm text-gray-700 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Your current city">
+              </div>
+              <div>
+                <label for="country" class="block mb-1 text-sm font-medium text-gray-700">
+                  <svg class="inline w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"/>
+                  </svg>
+                  Country
+                </label>
+                <input type="text" id="country" name="country" 
+                       class="w-full px-3 py-2 text-sm text-gray-700 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Your country">
+              </div>
+            </div>
+
+            <!-- Education and Workplace -->
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label for="education" class="block mb-1 text-sm font-medium text-gray-700">
+                  <svg class="inline w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z"/>
+                    <path d="M3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0z"/>
+                  </svg>
+                  Education
+                </label>
+                <input type="text" id="education" name="education" 
+                       class="w-full px-3 py-2 text-sm text-gray-700 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="University, School">
+              </div>
+              <div>
+                <label for="workplace" class="block mb-1 text-sm font-medium text-gray-700">
+                  <svg class="inline w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                    <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z"/>
+                  </svg>
+                  Workplace
+                </label>
+                <input type="text" id="workplace" name="workplace" 
+                       class="w-full px-3 py-2 text-sm text-gray-700 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Company, Organization">
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+<!--       Fixed Footer with Buttons-->
+      <div class=" py-4   px-6 bg-white border-t border-gray-300">
+        <div class="flex gap-3 ">
+          <button type="button" onclick="closeProfileSettingsModal()"
+                  class="flex-1 px-4 py-2 text-black transition-transform hover:scale-105 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">
+            Cancel
+          </button>
+          <button type="submit" form="profileForm"
+                  class="flex-1 px-4 py-2 text-white transition-transform hover:scale-105 !bg-brand-600 rounded-md hover:!bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-600">
+            Update Profile
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

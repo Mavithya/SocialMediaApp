@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends - SocialHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.51.5/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand': {
+                            50 : '#f4f9ff',
+                            100: '#e0edff',
+                            200: '#c7dffe',
+                            300: '#a5cbfc',
+                            400: '#81b5f8',
+                            500: '#63a1f1',
+                            600: '#468be5',
+                            700: '#3878ca',
+                            800: '#3062a3',
+                            900: '#2e5281',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .scroll-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scroll-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: #c5c5c5;
+            border-radius: 4px;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .friend-card {
+            transition: all 0.3s ease;
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+        }
+
+        .friend-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.15);
+        }
+
+        .scroll-container {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e0 #f1f5f9;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .modern-card {
+            border-radius: 16px;
+        }
+
+        .online-indicator {
+            background: linear-gradient(45deg, #10b981, #34d399);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .w-64 {
+                width: 100%;
+                position: relative !important;
+                height: auto !important;
+                padding-top: 0 !important;
+            }
+
+            .ml-64 {
+                margin-left: 0 !important;
+            }
+
+            .mt-16 {
+                margin-top: 0 !important;
+            }
+
+            .flex-1.overflow-y-auto {
+                margin-top: 1rem !important;
+            }
+        }
+
+        input:focus, select:focus, button:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        img {
+            transition: opacity 0.3s ease;
+        }
+
+        img:not([src]) {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="bg-brand-50 min-h-screen flex flex-col">
+
+<!-- Include the navbar component -->
+<div th:replace="components/navbar :: navbar" class="z-10"></div>
+
+<!-- Profile Modal -->
+<div id="profileModal" class="fixed inset-0 z-50 flex items-center justify-center hidden overflow-auto bg-black bg-opacity-50 backdrop-blur-sm">
+    <div class="w-full max-w-2xl mx-4 transition-all transform bg-white rounded-lg shadow-xl">
+        <div class="relative">
+            <!-- Close button -->
+            <button id="closeProfileModal" class="absolute top-4 right-4 text-gray-300 hover:text-white z-10">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            
+            <!-- Profile Header -->
+            <div class="relative bg-gradient-to-r from-brand-500 to-brand-800 h-32 rounded-t-lg">
+                <div class="absolute -bottom-16 left-6">
+                    <img id="modalProfileImage" src="" alt="Profile" class="w-32 h-32 rounded-full border-4 border-white object-cover">
+                </div>
+            </div>
+            
+            <!-- Profile Content -->
+            <div class="pt-20 p-6">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 id="modalFullName" class="text-2xl font-bold text-gray-800 mb-2">Full Name</h2>
+                        <p id="modalEmail" class="text-gray-600 mb-1">email@example.com</p>
+                        <p id="modalLocation" class="text-gray-500 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            Location
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Profile Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Basic Info -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-800 mb-3">Basic Information</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Gender:</span>
+                                <span id="modalGender" class="text-gray-800">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Date of Birth:</span>
+                                <span id="modalDateOfBirth" class="text-gray-800">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Username:</span>
+                                <span id="modalUsername" class="text-gray-800">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Info -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-800 mb-3">Additional Information</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Education:</span>
+                                <span id="modalEducation" class="text-gray-800">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Workplace:</span>
+                                <span id="modalWorkplace" class="text-gray-800">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="flex flex-1 overflow-hidden">
+    <!-- Left Sidebar -->
+    <div class="w-64 bg-white shadow-lg border-r border-gray-200 h-screen fixed left-0 top-0 pt-16 flex flex-col z-20">
+        <div class="p-6 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Friends
+            </h1>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="p-4">
+            <ul class="space-y-2">
+                <li>
+                    <button onclick="showSection('all-friends')"
+                            class="nav-item w-full flex items-center px-4 py-3 text-left rounded-lg hover:bg-gray-100 transition-colors active bg-brand-50 text-brand-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        All Friends
+                        <span class="ml-auto bg-brand-100 text-brand-600 px-2 py-1 rounded-full text-xs">127</span>
+                    </button>
+                </li>
+                <li>
+                    <button onclick="showSection('friend-requests')"
+                            class="nav-item w-full flex items-center px-4 py-3 text-left rounded-lg hover:bg-gray-100 transition-colors text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        Friend Requests
+                        <span class="ml-auto bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs">3</span>
+                    </button>
+                </li>
+                <li>
+                    <button onclick="showSection('sent-requests')"
+                            class="nav-item w-full flex items-center px-4 py-3 text-left rounded-lg hover:bg-gray-100 transition-colors text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                        Sent Requests
+                        <span class="ml-auto bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">5</span>
+                    </button>
+                </li>
+                <li>
+                    <button onclick="showSection('user-directory')"
+                            class="nav-item w-full flex items-center px-4 py-3 text-left rounded-lg hover:bg-gray-100 transition-colors text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Find Friends
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 overflow-y-auto scroll-container ml-64">
+        <!-- All Friends Section -->
+        <div id="all-friends" class="content-section">
+            <div  data-theme="light" class="bg-white border-b border-gray-200 p-6 sticky top-0 z-30 shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">All Friends</h2>
+                <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
+                    <div class="relative w-full md:max-w-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input  type="text"
+                                placeholder="Search friends..."
+                                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg
+                                         focus:ring-2 focus:ring-brand-500 focus:border-transparent
+                                         !bg-white  dark:!bg-white !text-black !placeholder-gray-400"
+                        />
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <!-- Dynamic Friends Container -->
+                <div id="all-friends-container">
+                    <!-- Loading indicator -->
+                    <div id="loading-friends" class="flex items-center justify-center py-8" style="display: none;">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
+                        <span class="ml-3 text-gray-600">Loading friends...</span>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Friend Requests Section -->
+        <div id="friend-requests" class="content-section hidden">
+            <div class="bg-white border-b border-gray-200 p-6 sticky top-0 z-30 shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-800">Friend Requests</h2>
+                <p class="text-gray-600 mt-1">People who want to connect with you</p>
+            </div>
+
+            <div class="p-6">
+                <div id="friend-requests-container">
+                    <div id="loading-requests" class="flex items-center justify-center py-8" style="display: none;">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
+                        <span class="ml-3 text-gray-600">Loading requests...</span>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Sent Requests Section -->
+        <div id="sent-requests" class="content-section hidden">
+            <div class="bg-white border-b border-gray-200 p-6 sticky top-0 z-30 shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-800">Sent Requests</h2>
+                <p class="text-gray-600 mt-1">Friend requests you've sent</p>
+            </div>
+
+            <div class="p-6">
+                <!-- Dynamic Sent Requests Container -->
+                <div id="sent-requests-container">
+                    <!-- Loading indicator -->
+                    <div id="loading-sent-requests" class="flex items-center justify-center py-8" style="display: none;">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
+                        <span class="ml-3 text-gray-600">Loading sent requests...</span>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- User Directory Section -->
+        <div id="user-directory" class="content-section hidden">
+            <div class="bg-white border-b border-gray-200 p-6 sticky top-0 z-30 shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Find Friends</h2>
+                <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
+                    <div class="relative w-full md:max-w-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input type="text" placeholder="Search people..."
+                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg
+                                         focus:ring-2 focus:ring-brand-500 focus:border-transparent
+                                         !bg-white  dark:!bg-white !text-black !placeholder-gray-400"
+                        />
+
+                    </div>
+                    <button class="bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors w-full md:w-auto">
+                        Search
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <div id="user-directory-cards" class="space-y-4">
+                    <!-- User Directory Cards  -->
+                    <div id="loading-users" class="flex justify-center items-center py-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
+                        <span class="ml-3 text-gray-600">Loading users...</span>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div id="user-directory-pagination" class="mt-8 justify-center hidden">
+                    <div class="flex space-x-2">
+                        <button id="prev-page" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50" disabled>
+                            Previous
+                        </button>
+                        <div id="page-numbers" class="flex space-x-2">
+                        </div>
+                        <button id="next-page" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Global variables for user directory
+    let currentPage = 0;
+    let totalPages = 0;
+    let currentUserId = null;
+
+    // Function to get current user ID
+    async function getCurrentUserId() {
+        try {
+            const response = await fetch('/api/users/current');
+            if (response.ok) {
+                const user = await response.json();
+                return user.id;
+            }
+        } catch (error) {
+            console.error('Error fetching current user:', error);
+        }
+        return null;
+    }
+
+    // Notification system
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transition-all duration-300 ${
+            type === 'success' ? 'bg-green-500 text-white' :
+            type === 'error' ? 'bg-red-500 text-white' :
+            'bg-brand-500 text-white'
+        }`;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // Function to load friends
+    async function loadFriends(page = 0) {
+        const loadingDiv = document.getElementById('loading-friends');
+        if (loadingDiv) {
+            loadingDiv.style.display = 'flex';
+        }
+        
+        try {
+            const response = await fetch(`/api/friends/list?page=${page}&size=10`);
+            if (response.ok) {
+                const data = await response.json();
+                displayFriendsList(data.content);
+                return data;
+            }
+        } catch (error) {
+            console.error('Error loading friends:', error);
+        }
+        
+        if (loadingDiv) {
+            loadingDiv.style.display = 'none';
+        }
+        return null;
+    }
+
+    // Function to load incoming friend requests
+    async function loadIncomingRequests(page = 0) {
+        const loadingDiv = document.getElementById('loading-requests');
+        if (loadingDiv) {
+            loadingDiv.style.display = 'flex';
+        }
+        
+        try {
+            const response = await fetch(`/api/friends/incoming?page=${page}&size=10`);
+            if (response.ok) {
+                const data = await response.json();
+                displayIncomingRequests(data.content);
+                return data;
+            } else {
+                console.error('Failed to load incoming requests:', response.status, response.statusText);
+            }
+        } catch (error) {
+            console.error('Error loading incoming requests:', error);
+        }
+        
+        if (loadingDiv) {
+            loadingDiv.style.display = 'none';
+        }
+        return null;
+    }
+
+    // Function to load outgoing friend requests
+    async function loadOutgoingRequests(page = 0) {
+        const loadingDiv = document.getElementById('loading-sent-requests');
+        if (loadingDiv) {
+            loadingDiv.style.display = 'flex';
+        }
+        
+        try {
+            const response = await fetch(`/api/friends/outgoing?page=${page}&size=10`);
+            if (response.ok) {
+                const data = await response.json();
+                displayOutgoingRequests(data.content);
+                return data;
+            } else {
+                console.error('Failed to load outgoing requests:', response.status, response.statusText);
+            }
+        } catch (error) {
+            console.error('Error loading outgoing requests:', error);
+        }
+        
+        if (loadingDiv) {
+            loadingDiv.style.display = 'none';
+        }
+        return null;
+    }
+
+    // Function to accept friend request
+    async function acceptFriendRequest(requestId) {
+        try {
+            const response = await fetch(`/api/friends/accept/${requestId}`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                showNotification('Friend request accepted!', 'success');
+                loadIncomingRequests(); // Refresh the list
+                loadFriends(); // Refresh friends list
+                loadFriendStats(); // Update counts
+            } else {
+                const errorText = await response.text();
+                showNotification(errorText || 'Failed to accept friend request', 'error');
+            }
+        } catch (error) {
+            console.error('Error accepting friend request:', error);
+            showNotification('Error accepting friend request', 'error');
+        }
+    }
+
+    // Function to decline friend request
+    async function declineFriendRequest(requestId) {
+        try {
+            const response = await fetch(`/api/friends/decline/${requestId}`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                showNotification('Friend request declined', 'success');
+                loadIncomingRequests();
+                loadFriendStats();
+            } else {
+                const errorText = await response.text();
+                showNotification(errorText || 'Failed to decline friend request', 'error');
+            }
+        } catch (error) {
+            console.error('Error declining friend request:', error);
+            showNotification('Error declining friend request', 'error');
+        }
+    }
+
+    // Function to cancel friend request
+    async function cancelFriendRequest(requestId) {
+        try {
+            const response = await fetch(`/api/friends/cancel/${requestId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                showNotification('Friend request cancelled', 'success');
+                loadOutgoingRequests();
+                loadFriendStats();
+            } else {
+                const errorText = await response.text();
+                showNotification(errorText || 'Failed to cancel friend request', 'error');
+            }
+        } catch (error) {
+            console.error('Error cancelling friend request:', error);
+            showNotification('Error cancelling friend request', 'error');
+        }
+    }
+
+    // Function to get default avatar image
+    function getDefaultAvatar() {
+        return 'data:image/svg+xml;base64,' + btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150">
+                <circle cx="75" cy="75" r="75" fill="#468be5"/>
+                <g fill="white">
+                    <circle cx="75" cy="55" r="20"/>
+                    <path d="M75 85 C55 85, 40 100, 40 120 L110 120 C110 100, 95 85, 75 85 Z"/>
+                </g>
+            </svg>
+        `);
+    }
+
+    // Function to format location display
+    function formatLocationDisplay(city, country) {
+        if (!city && !country) {
+            return '<p class="text-xs text-gray-500 mt-1 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Location not specified</p>';
+        }
+        
+        let locationText = '';
+        if (city && country) {
+            locationText = `${city}, ${country}`;
+        } else if (city) {
+            locationText = city;
+        } else if (country) {
+            locationText = country;
+        }
+        
+        return `<p class="text-xs text-gray-500 mt-1 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            ${locationText}
+        </p>`;
+    }
+
+    // Function to create user card HTML
+    function createUserCard(user) {
+        const fullName = `${user.firstName} ${user.lastName}`;
+        const profileImage = user.profilePicture && user.profilePicture.trim() !== '' ? 
+            user.profilePicture : 
+            getDefaultAvatar();
+        
+        // Format location display
+        const locationDisplay = formatLocationDisplay(user.city, user.country);
+
+        return `
+            <div class="friend-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center space-x-4">
+                    <img src="${profileImage}" alt="Profile" class="w-16 h-16 rounded-full object-cover">
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-800">${fullName}</h3>
+                        <p class="text-sm text-gray-600">${user.email}</p>
+                        ${locationDisplay}
+                    </div>
+                    <div class="flex space-x-3">
+                        <button class="bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors"
+                                onclick="addFriend(${user.id}, this)">
+                            Add Friend
+                        </button>
+                        <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                                onclick="viewProfile(${user.id})">
+                            View Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Function to fetch users from API
+    async function fetchUsers(page = 0, size = 5) {
+        try {
+            const response = await fetch(`/api/users/suggestions?page=${page}&size=${size}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            return null;
+        }
+    }
+
+    // Function to display users in the UI
+    function displayUsers(users) {
+        const container = document.getElementById('user-directory-cards');
+        const loadingDiv = document.getElementById('loading-users');
+
+        if (loadingDiv) {
+            loadingDiv.style.display = 'none';
+        }
+
+        if (!users || users.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <p class="text-lg font-medium">No users found</p>
+                        <p class="text-sm">Try adjusting your search criteria</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = users.map(user => createUserCard(user)).join('');
+    }
+
+    // Function to display friend list
+    function displayFriendsList(friends) {
+        const container = document.getElementById('all-friends-container');
+        const loadingDiv = document.getElementById('loading-friends');
+        
+        if (loadingDiv) {
+            loadingDiv.style.display = 'none';
+        }
+        
+        if (!friends || friends.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <p class="text-lg font-medium">No friends yet</p>
+                        <p class="text-sm">Start connecting with people you know!</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                ${friends.map(friend => createFriendCard(friend)).join('')}
+            </div>
+        `;
+    }
+
+    // Function to display incoming friend requests
+    function displayIncomingRequests(requests) {
+        const container = document.getElementById('friend-requests-container');
+        const loadingDiv = document.getElementById('loading-requests');
+        
+        if (loadingDiv) {
+            loadingDiv.style.display = 'none';
+        }
+        
+        if (!requests || requests.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        <p class="text-lg font-medium">No friend requests</p>
+                        <p class="text-sm">When people send you friend requests, they'll appear here</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="space-y-4">
+                ${requests.map(request => createIncomingRequestCard(request)).join('')}
+            </div>
+        `;
+    }
+
+    // Function to display outgoing friend requests
+    function displayOutgoingRequests(requests) {
+        const container = document.getElementById('sent-requests-container');
+        const loadingDiv = document.getElementById('loading-sent-requests');
+        
+        if (loadingDiv) {
+            loadingDiv.style.display = 'none';
+        }
+        
+        if (!requests || requests.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                        <p class="text-lg font-medium">No sent requests</p>
+                        <p class="text-sm">Friend requests you send will appear here</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="space-y-4">
+                ${requests.map(request => createOutgoingRequestCard(request)).join('')}
+            </div>
+        `;
+    }
+
+    // Function to create friend card
+    function createFriendCard(friend) {
+        const fullName = `${friend.firstName} ${friend.lastName}`;
+        const profileImage = friend.profilePicture && friend.profilePicture.trim() !== '' ?
+            friend.profilePicture : 
+            getDefaultAvatar();
+        
+        // Format location display
+        const locationDisplay = formatLocationDisplay(friend.city, friend.country);
+
+        return `
+            <div class="friend-card modern-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="relative">
+                    <img src="${profileImage}" alt="Profile" class="w-full h-48 object-cover">
+                    <div class="absolute top-3 right-3">
+                        <span class="online-indicator w-4 h-4 rounded-full border-2 border-white"></span>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-semibold text-gray-800 mb-1">${fullName}</h3>
+                    <div class="text-sm text-gray-600 mb-3 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        ${formatLocationText(friend.city, friend.country)}
+                    </div>
+                    <div class="flex justify-center">
+                        <button class="w-full px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 hover:border-gray-400"
+                                onclick="viewProfile(${friend.id})">
+                            View Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Function to create incoming request card
+    function createIncomingRequestCard(request) {
+        const sender = request.sender;
+        const fullName = `${sender.firstName} ${sender.lastName}`;
+        const profileImage = sender.profilePicture && sender.profilePicture.trim() !== '' ?
+            sender.profilePicture : 
+            getDefaultAvatar();
+        const timeAgo = getTimeAgo(request.createdAt);
+
+        return `
+            <div class="friend-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center space-x-4">
+                    <img src="${profileImage}" alt="Profile" class="w-16 h-16 rounded-full object-cover">
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-800">${fullName}</h3>
+                        <p class="text-sm text-gray-600">${sender.email}</p>
+                        <p class="text-xs text-gray-500 mt-1">${timeAgo}</p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button class="bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors"
+                                onclick="acceptFriendRequest(${request.id})">
+                            Accept
+                        </button>
+                        <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                                onclick="declineFriendRequest(${request.id})">
+                            Decline
+                        </button>
+                        <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                                onclick="viewProfile(${sender.id})">
+                            View Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Function to create outgoing request card
+    function createOutgoingRequestCard(request) {
+        const receiver = request.receiver;
+        const fullName = `${receiver.firstName} ${receiver.lastName}`;
+        const profileImage = receiver.profilePicture && receiver.profilePicture.trim() !== '' ?
+            receiver.profilePicture : 
+            getDefaultAvatar();
+        const timeAgo = getTimeAgo(request.createdAt);
+
+        return `
+            <div class="friend-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center space-x-4">
+                    <img src="${profileImage}" alt="Profile" class="w-16 h-16 rounded-full object-cover">
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-800">${fullName}</h3>
+                        <p class="text-sm text-gray-600">${receiver.email}</p>
+                        <p class="text-xs text-gray-500 mt-1">Sent ${timeAgo}</p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                                onclick="cancelFriendRequest(${request.id})">
+                            Cancel Request
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Function to get time ago string
+    function getTimeAgo(timestamp) {
+        const now = new Date();
+        const time = new Date(timestamp);
+        const diffInSeconds = Math.floor((now - time) / 1000);
+
+        if (diffInSeconds < 60) {
+            return 'Just now';
+        } else if (diffInSeconds < 3600) {
+            const minutes = Math.floor(diffInSeconds / 60);
+            return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+        } else if (diffInSeconds < 86400) {
+            const hours = Math.floor(diffInSeconds / 3600);
+            return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+        } else {
+            const days = Math.floor(diffInSeconds / 86400);
+            return `${days} day${days > 1 ? 's' : ''} ago`;
+        }
+    }
+
+    // Function to update pagination
+    function updatePagination(pageData) {
+        const paginationDiv = document.getElementById('user-directory-pagination');
+        const pageNumbersDiv = document.getElementById('page-numbers');
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+
+        currentPage = pageData.number;
+        totalPages = pageData.totalPages;
+
+        if (totalPages <= 1) {
+            paginationDiv.classList.add('hidden');
+            paginationDiv.classList.remove('flex');
+            return;
+        }
+
+        paginationDiv.classList.remove('hidden');
+        paginationDiv.classList.add('flex');
+
+        // Update previous button
+        prevButton.disabled = pageData.first;
+
+        // Update next button
+        nextButton.disabled = pageData.last;
+
+        // Generate page numbers
+        pageNumbersDiv.innerHTML = '';
+        for (let i = 0; i < totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.className = i === currentPage ?
+                'px-3 py-2 bg-brand-600 text-white rounded-lg' :
+                'px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50';
+            pageButton.textContent = i + 1;
+            pageButton.onclick = () => loadUsersPage(i);
+            pageNumbersDiv.appendChild(pageButton);
+        }
+    }
+
+    // Function to load users for a specific page
+    async function loadUsersPage(page) {
+        const loadingDiv = document.getElementById('loading-users');
+        if (loadingDiv) {
+            loadingDiv.style.display = 'flex';
+        }
+
+        const data = await fetchUsers(page, 5);
+
+        if (data) {
+            displayUsers(data.content);
+            updatePagination(data);
+        } else {
+            // Handle error case
+            const container = document.getElementById('user-directory-cards');
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="text-red-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-lg font-medium">Error loading users</p>
+                        <p class="text-sm">Please check your connection and try again</p>
+                        <button onclick="loadUsersPage(0)" class="mt-4 bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors">
+                            Retry
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // Function to handle search
+    async function searchUsers(searchTerm) {
+        if (searchTerm.trim() === '') {
+            loadUsersPage(0);
+            return;
+        }
+
+
+        const cards = document.querySelectorAll('#user-directory-cards .friend-card');
+        cards.forEach(card => {
+            const nameElement = card.querySelector('h3');
+            if (nameElement) {
+                const name = nameElement.textContent.toLowerCase();
+                if (name.includes(searchTerm.toLowerCase())) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    // Functions for user actions
+    async function addFriend(userId, buttonElement) {
+        const button = buttonElement;
+        
+        try {
+            const response = await fetch(`/api/friends/request?receiverId=${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                // Update the button text and style
+                button.textContent = 'Request Sent';
+                button.classList.remove('bg-brand-600', 'hover:bg-brand-700');
+                button.classList.add('bg-gray-400', 'cursor-not-allowed');
+                button.disabled = true;
+                
+                // Show success message
+                showNotification('Friend request sent successfully!', 'success');
+                
+                // Update counts and refresh relevant sections
+                loadFriendStats();
+                
+                const sentRequestsSection = document.getElementById('sent-requests');
+                if (sentRequestsSection && !sentRequestsSection.classList.contains('hidden')) {
+                    loadOutgoingRequests(0);
+                }
+            } else {
+                const errorText = await response.text();
+                showNotification(errorText || 'Failed to send friend request', 'error');
+            }
+        } catch (error) {
+            console.error('Error sending friend request:', error);
+            showNotification('Error sending friend request', 'error');
+        }
+    }
+
+    function viewProfile(userId) {
+        console.log('viewProfile called with userId:', userId, 'Type:', typeof userId);
+        fetchUserProfile(userId);
+    }
+
+    // Function to fetch user profile details
+    async function fetchUserProfile(userId) {
+        try {
+            console.log('Fetching profile for user ID:', userId);
+            const response = await fetch(`/api/users/${userId}`);
+            
+            if (response.ok) {
+                const user = await response.json();
+                console.log('User profile loaded:', user);
+                showProfileModal(user);
+            } else {
+                console.error('Failed to fetch user profile. Status:', response.status, response.statusText);
+                if (response.status === 404) {
+                    showNotification('User profile not found', 'error');
+                } else if (response.status === 401) {
+                    showNotification('You need to be logged in to view profiles', 'error');
+                } else {
+                    showNotification(`Failed to load user profile (${response.status})`, 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
+            showNotification('Network error while loading user profile', 'error');
+        }
+    }
+
+    // Function to show profile modal with user data
+    function showProfileModal(user) {
+        const modal = document.getElementById('profileModal');
+        
+        // Populate modal with user data
+        document.getElementById('modalFullName').textContent = `${user.firstName} ${user.lastName}`;
+        document.getElementById('modalEmail').textContent = user.email;
+        
+        // Profile image
+        const profileImage = user.profilePicture && user.profilePicture.trim() !== '' ? 
+            user.profilePicture : 
+            getDefaultAvatar();
+        document.getElementById('modalProfileImage').src = profileImage;
+        
+        // Location
+        const locationText = formatLocationText(user.city, user.country);
+        document.getElementById('modalLocation').innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            ${locationText}
+        `;
+        
+        // Basic information
+        document.getElementById('modalGender').textContent = user.gender || '-';
+        document.getElementById('modalDateOfBirth').textContent = user.dateOfBirth ? formatDate(user.dateOfBirth) : '-';
+        document.getElementById('modalUsername').textContent = user.username || '-';
+        
+        // Additional information
+        document.getElementById('modalEducation').textContent = user.education || '-';
+        document.getElementById('modalWorkplace').textContent = user.workplace || '-';
+        
+        // Show modal
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    // Function to format location text
+    function formatLocationText(city, country) {
+        if (!city && !country) {
+            return 'Location not specified';
+        }
+        
+        if (city && country) {
+            return `${city}, ${country}`;
+        } else if (city) {
+            return city;
+        } else if (country) {
+            return country;
+        }
+    }
+
+    // Function to format date
+    function formatDate(dateString) {
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch (error) {
+            return dateString;
+        }
+    }
+
+    // Function to close profile modal
+    function closeProfileModal() {
+        const modal = document.getElementById('profileModal');
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    // Update existing navigation functionality
+    function showSection(sectionId) {
+        // Hide all sections
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => section.classList.add('hidden'));
+
+        // Show selected section
+        document.getElementById(sectionId).classList.remove('hidden');
+
+        // Update navigation active state
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.classList.remove('active', 'bg-brand-50', 'text-brand-600');
+            item.classList.add('text-gray-700');
+        });
+
+        // Set active nav item - find the button for this section
+        const targetButton = document.querySelector(`[onclick="showSection('${sectionId}')"]`);
+        if (targetButton) {
+            targetButton.classList.add('active', 'bg-brand-50', 'text-brand-600');
+            targetButton.classList.remove('text-gray-700');
+        }
+
+        // Load appropriate data for each section
+        switch(sectionId) {
+            case 'all-friends':
+                loadFriends(0);
+                break;
+            case 'friend-requests':
+                loadIncomingRequests(0);
+                break;
+            case 'sent-requests':
+                loadOutgoingRequests(0);
+                break;
+            case 'user-directory':
+                loadUsersPage(0);
+                break;
+        }
+    }
+
+    // Function to load and update friend stats
+    async function loadFriendStats() {
+        try {
+            const response = await fetch('/api/friends/stats');
+            if (response.ok) {
+                const stats = await response.json();
+                
+                // Update navigation badges
+                const friendCountBadge = document.querySelector('[onclick="showSection(\'all-friends\')"] .bg-brand-100');
+                const incomingCountBadge = document.querySelector('[onclick="showSection(\'friend-requests\')"] .bg-red-100');
+                const outgoingCountBadge = document.querySelector('[onclick="showSection(\'sent-requests\')"] .bg-gray-100');
+                
+                if (friendCountBadge) {
+                    friendCountBadge.textContent = stats.friendCount;
+                }
+                if (incomingCountBadge) {
+                    incomingCountBadge.textContent = stats.incomingRequestCount;
+                }
+                if (outgoingCountBadge) {
+                    outgoingCountBadge.textContent = stats.outgoingRequestCount;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading friend stats:', error);
+        }
+    }
+
+    // Initialize the application
+    async function initializeApp() {
+        // Load friend stats
+        await loadFriendStats();
+        
+        // Check URL parameters to determine which section to show
+        const urlParams = new URLSearchParams(window.location.search);
+        const section = urlParams.get('section');
+        
+        if (section === 'all-friends' || section === 'friend-requests' || section === 'sent-requests' || section === 'user-directory') {
+            showSection(section);
+        } else {
+            showSection('user-directory');
+        }
+    }
+
+    // Friend request actions
+    document.addEventListener('click', function(e) {
+        if (e.target.textContent === 'Accept') {
+            e.target.textContent = 'Accepted';
+            e.target.classList.remove('bg-brand-600', 'hover:bg-brand-700');
+            e.target.classList.add('bg-green-600', 'hover:bg-green-700');
+
+            // Hide decline button
+            const declineBtn = e.target.nextElementSibling;
+            if (declineBtn) declineBtn.style.display = 'none';
+        }
+
+        if (e.target.textContent === 'Decline') {
+            e.target.closest('.bg-white').style.display = 'none';
+        }
+
+        if (e.target.textContent === 'Cancel Request') {
+            e.target.closest('.bg-white').style.display = 'none';
+        }
+
+        // Handle Add Friend buttons that don't have onclick handlers
+        if (e.target.textContent === 'Add Friend' && !e.target.hasAttribute('onclick')) {
+            e.target.textContent = 'Request Sent';
+            e.target.classList.remove('bg-brand-600', 'hover:bg-brand-700');
+            e.target.classList.add('bg-gray-400', 'cursor-not-allowed');
+            e.target.disabled = true;
+        }
+    });
+
+    // Search functionality
+    document.addEventListener('input', function(e) {
+        if (e.target.placeholder.includes('Search')) {
+            const searchTerm = e.target.value.toLowerCase();
+
+            // Check if we're in the user directory section
+            const userDirectorySection = document.getElementById('user-directory');
+            if (!userDirectorySection.classList.contains('hidden')) {
+                searchUsers(searchTerm);
+            } else {
+                // Handle regular friend search
+                const cards = document.querySelectorAll('.friend-card');
+                cards.forEach(card => {
+                    const nameElement = card.querySelector('h3');
+                    if (nameElement) {
+                        const name = nameElement.textContent.toLowerCase();
+                        if (name.includes(searchTerm)) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+    // Pagination event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        // Previous page button
+        document.getElementById('prev-page').addEventListener('click', function() {
+            if (currentPage > 0) {
+                loadUsersPage(currentPage - 1);
+            }
+        });
+
+        // Next page button
+        document.getElementById('next-page').addEventListener('click', function() {
+            if (currentPage < totalPages - 1) {
+                loadUsersPage(currentPage + 1);
+            }
+        });
+
+        // Profile modal close button
+        document.getElementById('closeProfileModal').addEventListener('click', closeProfileModal);
+        
+        // Close modal when clicking outside
+        document.getElementById('profileModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeProfileModal();
+            }
+        });
+
+        // Initialize the application
+        initializeApp();
+    });
+</script>
+</body>
+</html>

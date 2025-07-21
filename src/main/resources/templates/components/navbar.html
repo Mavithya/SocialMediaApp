@@ -1,0 +1,256 @@
+<nav th:fragment="navbar" class="navbar bg-white shadow-lg sticky top-0 z-50">
+    <div class="navbar-start">
+        <a class="btn btn-ghost normal-case text-3xl  font-bold !text-brand-500">Socialite</a>
+    </div>
+    <!-- SearchBar -->
+    <div class="navbar-center hidden lg:flex">
+        <div class="form-control relative">
+            <form method="GET" action="/search" class="relative">
+                <input type="text" name="q" id="navSearchInput" placeholder="Search posts, people..."
+                       class="input input-bordered w-96 bg-white rounded-full border-gray-400 text-black placeholder-gray-400 focus:border-gray-400 pr-12" 
+                       autocomplete="on" />
+                <button type="submit" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </button>
+            </form>
+            
+            <!-- Search suggestions dropdown -->
+            <div id="searchSuggestions" class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg mt-1 hidden z-50 max-h-96 overflow-y-auto">
+                <div id="suggestionContent" class="p-2">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="navbar-end">
+        <div class="flex items-center gap-4">
+            <a th:href="@{/home}" class="btn btn-ghost btn-circle text-gray-600  bg-gray-200 hover:bg-gray-300">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                </svg>
+            </a>
+            <a th:href="@{/friends}" class="btn btn-ghost btn-circle text-gray-600  bg-gray-200 hover:bg-gray-300">
+
+                <svg  viewBox="0 0 24 24" fill="currentColor" class="w-6 h-5">
+                    <path d="M4.5 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM14.25 8.625a3.375 3.375 0 1 1 6.75 0 3.375 3.375 0 0 1-6.75 0ZM1.5 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM17.25 19.128l-.001.144a2.25 2.25 0 0 1-.233.96 10.088 10.088 0 0 0 5.06-1.01.75.75 0 0 0 .42-.643 4.875 4.875 0 0 0-6.957-4.611 8.586 8.586 0 0 1 1.71 5.157v.003Z" />
+                </svg>
+
+
+            </a>
+
+            <button class="btn btn-ghost btn-circle relative text-gray-600  bg-gray-200 hover:bg-gray-300">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                </svg>
+                <span class="badge badge-sm badge-primary absolute -top-1 -right-1 !bg-brand-500 border-none">2</span>
+            </button>
+            <!-- Logout Button -->
+            <div class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-ghost btn-circle text-gray-600 bg-gray-200 hover:bg-gray-300" title="Logout">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-logout">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+                        <path d="M9 12h12l-3 -3" />
+                        <path d="M18 15l3 -3" />
+                    </svg>
+                </label>
+
+                <div tabindex="0" class="dropdown-content mt-3 z-[100] card card-compact w-[255px] bg-white shadow-xl border border-gray-300">
+                    <div class="card-body">
+                        <div class="flex items-start gap-3 ">
+                            <div class="w-10 h-10 mt-[6px] ml-[4px] bg-brand-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-brand-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1 ">
+                                <h3 class="font-semibold text-black text-base">Are you sure you want to logout?</h3>
+                                <div class="flex mt-4 justify-end gap-2">
+                                    <button onclick="document.activeElement.blur(); event.stopPropagation();"
+                                            class="px-4 py-2 rounded-2xl bg-gray-200 text-gray-900 text-sm font-medium  hover:bg-gray-300 transition-transform hover:scale-105 duration-200">
+                                        Cancel
+                                    </button>
+                                    <form th:action="@{/logout}" method="post" class="inline">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <button type="submit" class="px-4 py-2 !bg-brand-600 text-white text-sm font-medium rounded-2xl hover:!bg-brand-700  transition-transform hover:scale-105 duration-200">
+                                            Yes
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('navSearchInput');
+    const suggestionsDropdown = document.getElementById('searchSuggestions');
+    const suggestionContent = document.getElementById('suggestionContent');
+    let searchTimeout;
+
+    if (searchInput && suggestionsDropdown && suggestionContent) {
+        // Show suggestions on input
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            clearTimeout(searchTimeout);
+            
+            if (query.length >= 2) {
+                searchTimeout = setTimeout(() => {
+                    fetchSearchSuggestions(query);
+                }, 300);
+            } else {
+                hideSuggestions();
+            }
+        });
+
+        // Hide suggestions on focus out (with delay to allow clicking)
+        searchInput.addEventListener('blur', function() {
+            setTimeout(() => {
+                hideSuggestions();
+            }, 200);
+        });
+
+        // Show suggestions on focus if there's text
+        searchInput.addEventListener('focus', function() {
+            const query = this.value.trim();
+            if (query.length >= 2) {
+                fetchSearchSuggestions(query);
+            }
+        });
+
+        // Handle Enter key
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value.trim();
+                if (query) {
+                    window.location.href = `/search?q=${encodeURIComponent(query)}`;
+                }
+                e.preventDefault();
+            }
+        });
+    }
+
+    function fetchSearchSuggestions(query) {
+        const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+        const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+        
+        const headers = {
+            'X-Requested-With': 'XMLHttpRequest'
+        };
+        
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+        
+        fetch(`/search/api/suggestions?q=${encodeURIComponent(query)}`, {
+            method: 'GET',
+            headers: headers
+        })
+            .then(response => response.json())
+            .then(data => {
+                displaySuggestions(data, query);
+            })
+            .catch(error => {
+                console.error('Error fetching suggestions:', error);
+                hideSuggestions();
+            });
+    }
+
+    function displaySuggestions(data, query) {
+        let html = '';
+        
+        // Users section
+        if (data.users && data.users.length > 0) {
+            html += `<div class="mb-2">
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-2">People</h4>`;
+            
+            data.users.forEach(user => {
+                const avatar = user.profilePicture 
+                    ? `<img src="/uploads/profiles/${user.profilePicture}" alt="${user.firstName} ${user.lastName}" class="w-8 h-8 rounded-full object-cover">`
+                    : `<div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                         <span class="text-white text-xs font-semibold">${user.firstName.charAt(0)}${user.lastName.charAt(0)}</span>
+                       </div>`;
+                
+                html += `<div class="suggestion-item flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer" onclick="window.location.href='/search?q=${encodeURIComponent(user.firstName + ' ' + user.lastName)}&type=people'">
+                            ${avatar}
+                            <div class="ml-3">
+                                <div class="text-sm font-medium text-gray-900">${user.firstName} ${user.lastName}</div>
+                                ${user.username ? `<div class="text-xs text-gray-500">@${user.username}</div>` : ''}
+                            </div>
+                         </div>`;
+            });
+            html += '</div>';
+        }
+
+        // Posts section
+        if (data.posts && data.posts.length > 0) {
+            html += `<div class="mb-2">
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-2">Posts</h4>`;
+            
+            data.posts.forEach(post => {
+                const content = post.content.length > 50 ? post.content.substring(0, 50) + '...' : post.content;
+                const avatar = post.user.profilePicture 
+                    ? `<img src="/uploads/profiles/${post.user.profilePicture}" alt="${post.user.firstName} ${post.user.lastName}" class="w-6 h-6 rounded-full object-cover">`
+                    : `<div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                         <span class="text-white text-xs font-semibold">${post.user.firstName.charAt(0)}${post.user.lastName.charAt(0)}</span>
+                       </div>`;
+                
+                html += `<div class="suggestion-item px-3 py-2 hover:bg-gray-50 cursor-pointer" onclick="window.location.href='/search?q=${encodeURIComponent(query)}&type=posts'">
+                            <div class="flex items-start">
+                                ${avatar}
+                                <div class="ml-2 flex-1">
+                                    <div class="text-xs text-gray-600">${post.user.firstName} ${post.user.lastName}</div>
+                                    <div class="text-sm text-gray-900">${content}</div>
+                                </div>
+                            </div>
+                         </div>`;
+            });
+            html += '</div>';
+        }
+
+        // View all results option
+        if (html) {
+            html += `<div class="border-t border-gray-200 pt-2 mt-2">
+                        <div class="suggestion-item px-3 py-2 hover:bg-gray-50 cursor-pointer text-blue-600 font-medium" onclick="window.location.href='/search?q=${encodeURIComponent(query)}'">
+                            <div class="flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                                View all results for "${query}"
+                            </div>
+                         </div>
+                     </div>`;
+        }
+
+        if (html) {
+            suggestionContent.innerHTML = html;
+            showSuggestions();
+        } else {
+            hideSuggestions();
+        }
+    }
+
+    function showSuggestions() {
+        suggestionsDropdown.classList.remove('hidden');
+    }
+
+    function hideSuggestions() {
+        suggestionsDropdown.classList.add('hidden');
+    }
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !suggestionsDropdown.contains(e.target)) {
+            hideSuggestions();
+        }
+    });
+});
+</script>

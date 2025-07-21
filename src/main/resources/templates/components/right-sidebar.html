@@ -1,0 +1,59 @@
+<div th:fragment="rightSidebar" class="hidden xl:block">
+
+    <!-- People You May Know -->
+    <div class="card bg-white shadow-xl mb-6">
+        <div class="card-body">
+            <div class="flex items-center justify-between mb-4 space-y-2">
+                <h3 class="card-title text-black">Suggested for you</h3>
+                <a href="/friends?section=user-directory" class="btn ml-3 btn-primary btn-sm !bg-brand-50 !border-brand-300 shadow-md shadow-brand-500 transition-transform hover:scale-105 add-friend-btn !text-brand-600">SEE ALL</a>
+            </div>
+            <div class="space-y-4" id="friend-suggestions-container ">
+                <!-- Dynamic friend suggestions will be loaded here -->
+                <div th:if="${friendSuggestions != null and !#lists.isEmpty(friendSuggestions)}" class="space-y-5">
+                    <div th:each="suggestion : ${friendSuggestions}" class="flex items-center gap-3">
+                        <div class="avatar">
+                            <div th:if="${suggestion.profilePicture != null and !#strings.isEmpty(suggestion.profilePicture)}"
+                                 class="w-12 h-12 rounded-full overflow-hidden">
+                                <img th:src="${suggestion.profilePicture}" 
+                                     th:alt="${suggestion.firstName + ' ' + suggestion.lastName}" 
+                                     class="w-full h-full object-cover">
+
+                            </div>
+                            <div th:unless="${suggestion.profilePicture != null and !#strings.isEmpty(suggestion.profilePicture)}"
+                                 class="w-12 h-12 rounded-full bg-gray-500 flex items-center justify-center">
+                                <svg class="mt-[10px] ml-[12px] w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                          d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                          clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <p th:text="${suggestion.firstName + ' ' + suggestion.lastName}" class="text-black font-semibold"></p>
+                            <div th:if="${suggestion.city != null and !#strings.isEmpty(suggestion.city)} or ${suggestion.country != null and !#strings.isEmpty(suggestion.country)}" 
+                                 class="flex items-center text-gray-400 text-sm">
+                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>
+                                    <span th:if="${suggestion.city != null and !#strings.isEmpty(suggestion.city)}" th:text="${suggestion.city}"></span><span th:if="${suggestion.city != null and !#strings.isEmpty(suggestion.city)} and ${suggestion.country != null and !#strings.isEmpty(suggestion.country)}">, </span><span th:if="${suggestion.country != null and !#strings.isEmpty(suggestion.country)}" th:text="${suggestion.country}"></span>
+                                </span>
+                            </div>
+                            <p th:unless="${suggestion.city != null and !#strings.isEmpty(suggestion.city)} or ${suggestion.country != null and !#strings.isEmpty(suggestion.country)}" 
+                               class="text-gray-400 text-sm">Suggested for you</p>
+                        </div>
+                        <button th:data-user-id="${suggestion.id}" 
+                                class="btn btn-primary btn-sm !bg-brand-500 !border-brand-500 shadow-md shadow-brand-500 transition-transform hover:scale-105 add-friend-btn">
+                            Add
+                        </button>
+                    </div>
+                </div>
+                <!-- No suggestions available -->
+                <div th:if="${friendSuggestions == null or #lists.isEmpty(friendSuggestions)}" 
+                     class="text-center text-gray-500 py-4">
+                    <p>No suggestions available</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

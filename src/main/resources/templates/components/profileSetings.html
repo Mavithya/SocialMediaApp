@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security6">
+<head>
+    <meta charset="UTF-8" />
+    <title>Profile Settings – SocialApp</title>
+    <link th:href="@{/css/main.css}" rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="min-h-screen text-white bg-gradient-to-br from-brand-400 via-brand-200 to-blue-100 animate-gradient">
+<div class="max-w-3xl px-8 py-10 mx-auto">
+    <div class="p-8 bg-gray-900 shadow-2xl rounded-3xl">
+        <h1 class="mb-6 text-4xl font-bold text-brand-400">Edit Profile</h1>
+
+        <form th:action="@{/profile/update}" method="post" class="space-y-4">
+            <div>
+                <label class="block mb-1 text-sm font-semibold">First Name</label>
+                <input type="text" name="firstName" class="w-full text-white bg-gray-800 border-gray-700 input input-bordered" placeholder="Anujaya" required>
+            </div>
+            <div>
+                <label class="block mb-1 text-sm font-semibold">Last Name</label>
+                <input type="text" name="lastName" class="w-full text-white bg-gray-800 border-gray-700 input input-bordered" placeholder="Perera" required>
+            </div>
+            <div>
+                <label class="block mb-1 text-sm font-semibold">Email</label>
+                <input type="email" name="email" class="w-full text-white bg-gray-800 border-gray-700 input input-bordered" placeholder="you@example.com" required>
+            </div>
+            <div>
+                <label class="block mb-1 text-sm font-semibold">Password</label>
+                <input type="password" name="password" class="w-full text-white bg-gray-800 border-gray-700 input input-bordered" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="w-full mt-4 mb-5 btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - Socialite</title>
+    <link th:href="@{/css/main.css}" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
+    
+    <!-- CSRF Token for AJAX requests -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+
+<body class="min-h-screen text-gray-900 bg-gray-50">
+
+<!-- Include navbar -->
+<div th:replace="~{components/navbar :: navbar}"></div>
+
+<div class="container max-w-4xl px-4 py-8 mx-auto">
+    <!-- Search Header -->
+    <div class="mb-8">
+        <h1 class="mb-4 text-3xl font-bold text-gray-900" th:if="${searchTerm != null}">
+            Search Results for "<span th:text="${searchTerm}"></span>"
+        </h1>
+        <h1 class="mb-4 text-3xl font-bold text-gray-900" th:unless="${searchTerm != null}">
+            Search
+        </h1>
+        
+        <!-- Search Form -->
+        <form method="GET" th:action="@{/search}" class="mb-6">
+            <div class="flex flex-col gap-5 md:flex-row">
+                <div class="flex-1">
+                    <input type="text" name="q" th:value="${searchTerm}" 
+                           placeholder="Search posts, people..."
+                           class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-2xl
+                                         focus:ring-2 focus:ring-brand-500 focus:border-transparent
+                                         !bg-white  dark:!bg-white !text-black !placeholder-gray-400">
+                </div>
+                <div class="flex gap-4">
+                    <select name="type" class="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent
+                                         !bg-white  dark:!bg-white !text-black !placeholder-gray-400">
+                        <option value="all" th:selected="${searchType == null or searchType == 'all'}">All</option>
+                        <option value="people" th:selected="${searchType == 'people'}">People</option>
+                        <option value="posts" th:selected="${searchType == 'posts'}">Posts</option>
+                    </select>
+                    <button type="submit" class="px-6 py-2 ml-2 text-white transition-colors bg-blue-600 rounded-2xl hover:bg-blue-700">
+                        Search
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results -->
+    <div th:if="${searchTerm != null}">
+        <!-- Search Type Tabs -->
+        <div class="flex p-1 mb-6 space-x-1 bg-gray-100 rounded-lg" th:if="${searchType == null or searchType == 'all'}">
+            <button onclick="showTab('people')" 
+                    class="flex-1 px-4 py-2 text-gray-600 transition-colors rounded-md tab-btn hover:text-gray-900" 
+                    id="people-tab">
+                People <span th:if="${totalUsers != null}" class="ml-1 text-sm">(<span th:text="${totalUsers}"></span>)</span>
+            </button>
+            <button onclick="showTab('posts')" 
+                    class="flex-1 px-4 py-2 text-gray-600 transition-colors rounded-md tab-btn hover:text-gray-900" 
+                    id="posts-tab">
+                Posts <span th:if="${totalPosts != null}" class="ml-1 text-sm">(<span th:text="${totalPosts}"></span>)</span>
+            </button>
+        </div>
+
+        <!-- People Results -->
+        <div id="people-results" class="tab-content">
+            <div th:if="${users != null and !#lists.isEmpty(users)}">
+                <h2 class="mb-4 text-xl font-semibold text-gray-800">People</h2>
+                <div class="space-y-4">
+                    <div th:each="user : ${users}" class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0">
+                                <div th:if="${user.profilePicture != null and !#strings.isEmpty(user.profilePicture)}"
+                                     class="w-12 h-12 overflow-hidden rounded-full">
+                                    <img th:src="@{'/uploads/profiles/' + ${user.profilePicture}}" 
+                                         th:alt="${user.firstName + ' ' + user.lastName}" 
+                                         class="object-cover w-full h-full">
+                                </div>
+                                <div th:unless="${user.profilePicture != null and !#strings.isEmpty(user.profilePicture)}"
+                                     class="flex items-center justify-center w-12 h-12 bg-blue-500 rounded-full">
+                                    <span th:text="${#strings.substring(user.firstName, 0, 1) + #strings.substring(user.lastName, 0, 1)}" 
+                                          class="text-lg font-semibold text-white"></span>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 th:text="${user.firstName + ' ' + user.lastName}" class="font-semibold text-gray-900 truncate"></h3>
+                                <p th:if="${user.username != null}" th:text="'@' + ${user.username}" class="text-sm text-gray-500 truncate"></p>
+                                <p th:if="${user.city != null or user.country != null}" 
+                                   class="text-sm text-gray-400 truncate">
+                                    <span th:if="${user.city}" th:text="${user.city}"></span>
+                                    <span th:if="${user.city and user.country}">, </span>
+                                    <span th:if="${user.country}" th:text="${user.country}"></span>
+                                </p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <button th:data-user-id="${user.id}" 
+                                        class="px-4 py-2 text-sm text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 add-friend-btn">
+                                    Add Friend
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${(users == null or #lists.isEmpty(users)) and (searchType == null or searchType == 'all' or searchType == 'people')}"
+                 class="py-8 text-center text-gray-500">
+                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                <h3 class="mb-2 text-lg font-semibold text-gray-400">No people found</h3>
+                <p class="text-gray-400">Try adjusting your search terms</p>
+            </div>
+        </div>
+
+        <!-- Posts Results -->
+        <div id="posts-results" class="hidden tab-content">
+            <div th:if="${posts != null and !#lists.isEmpty(posts)}">
+                <h2 class="mb-4 text-xl font-semibold text-gray-800">Posts</h2>
+                <div class="space-y-6">
+                    <div th:each="post : ${posts}" class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0">
+                                <div th:if="${post.user.profilePicture != null and !#strings.isEmpty(post.user.profilePicture)}"
+                                     class="w-10 h-10 overflow-hidden rounded-full">
+                                    <img th:src="@{'/uploads/profiles/' + ${post.user.profilePicture}}" 
+                                         th:alt="${post.user.firstName + ' ' + post.user.lastName}" 
+                                         class="object-cover w-full h-full">
+                                </div>
+                                <div th:unless="${post.user.profilePicture != null and !#strings.isEmpty(post.user.profilePicture)}"
+                                     class="flex items-center justify-center w-10 h-10 bg-blue-500 rounded-full">
+                                    <span th:text="${#strings.substring(post.user.firstName, 0, 1) + #strings.substring(post.user.lastName, 0, 1)}" 
+                                          class="font-semibold text-white"></span>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center mb-2 space-x-2">
+                                    <h3 th:text="${post.user.firstName + ' ' + post.user.lastName}" class="font-semibold text-gray-900"></h3>
+                                    <span th:if="${post.user.username}" th:text="'@' + ${post.user.username}" class="text-sm text-gray-500"></span>
+                                    <span class="text-sm text-gray-400">•</span>
+                                    <span th:text="${#temporals.format(post.createdAt, 'MMM dd, yyyy')}" class="text-sm text-gray-500"></span>
+                                </div>
+                                <p th:text="${post.content}" class="text-gray-800 whitespace-pre-wrap"></p>
+                                <div class="flex items-center mt-4 space-x-6 text-gray-500">
+                                    <span class="flex items-center space-x-1">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                        </svg>
+                                        <span th:text="${post.likeCount ?: 0}"></span>
+                                    </span>
+                                    <span class="flex items-center space-x-1">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                        </svg>
+                                        <span th:text="${post.commentCount ?: 0}"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${(posts == null or #lists.isEmpty(posts)) and (searchType == null or searchType == 'all' or searchType == 'posts')}"
+                 class="py-8 text-center text-gray-500">
+                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+                <h3 class="mb-2 text-lg font-semibold text-gray-400">No posts found</h3>
+                <p class="text-gray-400">Try adjusting your search terms</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- No search performed yet -->
+    <div th:unless="${searchTerm != null}" class="py-12 text-center text-gray-500">
+        <svg class="w-20 h-20 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <h3 class="mb-2 text-xl font-semibold text-gray-400">Start searching</h3>
+        <p class="text-gray-400">Enter a search term to find posts and people</p>
+    </div>
+</div>
+
+<script>
+
+function showTab(tabName) {
+
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+        btn.classList.add('text-gray-600');
+    });
+    
+
+    document.getElementById(tabName + '-results').classList.remove('hidden');
+    
+
+    const activeTab = document.getElementById(tabName + '-tab');
+    activeTab.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+    activeTab.classList.remove('text-gray-600');
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    showTab('people');
+});
+
+
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('add-friend-btn')) {
+        const userId = e.target.getAttribute('data-user-id');
+        const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+        const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+        
+        const headers = {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        };
+        
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+        
+        // Make AJAX call to add the friend
+        fetch('/api/friends/send-request', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ userId: parseInt(userId) })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                e.target.textContent = 'Request Sent';
+                e.target.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                e.target.classList.add('bg-gray-400', 'cursor-not-allowed');
+                e.target.disabled = true;
+            } else {
+                console.error('Error sending friend request:', data.message);
+                alert(data.message || 'Failed to send friend request');
+            }
+        })
+        .catch(error => {
+            console.error('Error sending friend request:', error);
+            alert('Failed to send friend request. Please try again.');
+        });
+    }
+});
+</script>
+
+</body>
+</html>

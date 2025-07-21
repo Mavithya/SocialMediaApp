@@ -1,0 +1,243 @@
+<div th:fragment="feed" class="flex-1 max-w-2xl" xmlns:sec="http://www.w3.org/1999/xhtml">
+    <!-- Create Post Form -->
+    <form th:action="@{/posts}" method="post" class="mb-6 bg-gray-800 shadow-xl card ">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <div class="flex gap-4 bg-white card-body rounded-xl">
+            <!-- Current user avatar -->
+            <div class="avatar">
+                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-brand-500">
+                    <img th:if="${#authentication.principal.profilePicture != null and #authentication.principal.profilePicture != ''}" 
+                         th:src="${#authentication.principal.profilePicture}" 
+                         alt="Profile" 
+                         class="object-cover w-full h-full rounded-full"/>
+                    <svg th:unless="${#authentication.principal.profilePicture != null and #authentication.principal.profilePicture != ''}" 
+                         class="mt-[10px] ml-[12px] w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="flex-1">
+                <textarea name="content"
+                          class="w-full text-black placeholder-gray-400 border-gray-300 resize-none bg-gray-50 border-1 textarea textarea-bordered"
+                          placeholder="What's on your mind?"
+                          rows="3"></textarea>
+
+                <div class="flex flex-col">
+                    <!-- Action buttons -->
+                    <div class="flex items-center justify-between w-full mt-4 mb-4">
+                        <div class="relative">
+                            <button type="button" id="emojiButton" class="text-gray-700 btn btn-ghost btn-sm" onclick="toggleEmojiPicker()">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd"/>
+                                </svg>
+                                Emoji
+                            </button>
+                            
+                            <!-- Emoji Picker Popup -->
+                            <div id="emojiPicker" class="absolute left-0 z-50 hidden mb-2 top-10 bottom-full emoji-picker">
+                                <div class="p-5 overflow-y-auto bg-white border border-gray-200 shadow-xl rounded-2xl w-80 max-h-72">
+                                    <div class="mb-3">
+                                        <h3 class="mb-2 text-sm font-semibold text-gray-700">Choose an emoji</h3>
+                                        
+
+                                        <!-- Emoji Grid -->
+                                        <div class="grid grid-cols-8 gap-1 emoji-category" data-category="smileys">
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😀')">😀</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😃')">😃</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😄')">😄</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😁')">😁</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😆')">😆</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😅')">😅</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😂')">😂</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🤣')">🤣</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😊')">😊</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😇')">😇</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🙂')">🙂</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🙃')">🙃</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😉')">😉</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😌')">😌</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😍')">😍</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🥰')">🥰</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😘')">😘</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😗')">😗</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😙')">😙</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😚')">😚</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😋')">😋</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😛')">😛</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😜')">😜</button>
+                                            <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🤪')">🤪</button>
+                                        </div>
+                                        
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="text-gray-700 btn btn-ghost btn-sm">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                      d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                      clip-rule="evenodd"/>
+                            </svg>
+                            Location
+                        </button>
+                        <button type="button" class="text-gray-700 btn btn-ghost btn-sm">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                      d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                      clip-rule="evenodd"/>
+                            </svg>
+                            Event
+                        </button>
+                    </div>
+
+                    <!-- Counter + Submit -->
+                    <div class="flex items-center justify-between ">
+                        <span id="charCounter" class="text-xs text-gray-700">0/280 Characters</span>
+                        <div class="flex gap-3">
+                            <button type="reset" class="text-gray-700 btn btn-ghost btn-sm hover:bg-gray-200 hover:shadow-sm  hover:!shadow-gray-300 transition-transform hover:scale-105">Cancel</button>
+                            <button type="submit" class="btn btn-primary btn-sm !bg-brand-500 !border-brand-500 shadow-md shadow-brand-500 transition-transform hover:scale-105 disabled:text-white">Post</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Posts Feed -->
+    <div class="space-y-6">
+        <div th:each="post : ${posts}" class="bg-white shadow-xl card post-card" th:data-post-id="${post.id}">
+            <div class="flex items-start gap-4 card-body">
+                <!-- Author avatar -->
+                <div class="avatar">
+                    <div class="flex items-center justify-center w-12 h-12 rounded-full bg-brand-500">
+                        <img th:if="${post.user.profilePicture != null and post.user.profilePicture != ''}" 
+                             th:src="${post.user.profilePicture}" 
+                             alt="Profile" 
+                             class="object-cover w-full h-full rounded-full"/>
+                        <svg th:unless="${post.user.profilePicture != null and post.user.profilePicture != ''}" 
+                             class="mt-[10px] ml-[12px] w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="flex flex-col w-full">
+                    <div class="flex items-center gap-2 mb-2">
+                        <h3 class="font-semibold text-black"
+                            th:text="${post.user.firstName} + ' ' + ${post.user.lastName}">Author Name</h3>
+                        <span class="text-gray-400" th:text="'@' + ${post.user.email.split('@')[0]}">@username</span>
+                        <span class="text-gray-500">•</span>
+                        <span class="text-sm text-gray-400" th:text="${#temporals.format(post.createdAt, 'MMM dd, yyyy HH:mm')}">timestamp</span>
+
+                        <!-- Delete button for post owner -->
+                        <div class="ml-auto" sec:authorize="isAuthenticated()">
+                            <button th:if="${#authentication.name == post.user.email}"
+                                    class="text-gray-700 hover:text-red-400 btn btn-ghost btn-xs delete-post-button"
+                                    th:data-post-id="${post.id}"
+                                    title="Delete post">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 post-content-scroll">
+                        <p class="text-gray-700 break-words whitespace-pre-wrap" th:text="${post.content}">Post content…</p>
+                    </div>
+
+                    <div class="flex items-center justify-between ">
+                        <button class="text-gray-700 btn btn-ghost btn-sm hover:text-red-400 like-button">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="20"  height="20"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-heart">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572" />
+                            </svg>
+                            <span class="like-count">0</span>
+                        </button>
+                        <button class="text-gray-700 btn btn-ghost btn-sm comment-button">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="20"  height="20"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-message">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M8 9h8" />
+                                <path d="M8 13h6" />
+                                <path d="M18 4a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-5l-5 3v-3h-2a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12z" />
+                            </svg>
+                            Comment
+                        </button>
+                        <button class="text-gray-700 btn btn-ghost btn-sm">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="20"  height="20"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-share">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M6 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                                <path d="M18 6m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                                <path d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                                <path d="M8.7 10.7l6.6 -3.4" />
+                                <path d="M8.7 13.3l6.6 3.4" />
+                            </svg>
+                            Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Comment Modal -->
+    <div id="commentModal" class="fixed inset-0 z-50 flex items-center justify-center hidden overflow-auto bg-black bg-opacity-50 backdrop-blur-sm">
+        <div class="w-full max-w-lg mx-4 transition-all transform bg-white rounded-lg shadow-xl">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold text-black">Comments</h3>
+                    <button id="closeCommentModal" class="text-gray-700 hover:text-black">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Original Post -->
+                <div id="modalPostContent" class="pb-4 mb-4 border-b border-gray-300">
+                    <div class="flex items-start gap-3">
+                        <div class="avatar">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-brand-300">
+                                <svg class="mt-2 ml-[10px] w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-medium text-gray-900" id="modalPostAuthor">Author Name</h4>
+                                <span class="text-sm text-gray-700" id="modalPostTime">timestamp</span>
+                            </div>
+                            <div class="mt-1 overflow-y-auto max-h-24 post-content-scroll">
+                                <p class="text-gray-700 break-words whitespace-pre-wrap" id="modalPostText">Post content</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Comments List -->
+                <div id="commentsList" class="mb-4 space-y-4 overflow-y-auto max-h-60 "></div>
+                
+                <!-- Add Comment Form -->
+                <form id="commentForm" class="mt-4">
+                    <input type="hidden" id="postIdInput">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <textarea id="commentContent" rows="2"
+                              class="w-full px-3 py-2 text-gray-700 placeholder-gray-400 border border-gray-200 rounded-lg resize-none bg-gray-50 focus:ring-2 focus:border-none focus:ring-brand-400 focus:outline-none focus:border-transparent"
+                              placeholder="Write a comment..."></textarea>
+                    <div class="flex justify-end mt-2">
+                        <button type="submit" class="btn btn-primary btn-sm !bg-brand-500 !border-brand-500 shadow-md shadow-brand-500 transition-transform hover:scale-105">Post Comment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
