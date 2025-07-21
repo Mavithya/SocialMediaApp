@@ -230,10 +230,26 @@
       });
     }
 
-    // Close delete modal on Escape key
+    // Delete comment modal event listeners
+    const deleteCommentModal = document.getElementById('deleteCommentModal');
+    if (deleteCommentModal) {
+      deleteCommentModal.addEventListener('click', function(e) {
+        // Only close if clicking on the backdrop (not the modal content)
+        if (e.target === deleteCommentModal || e.target.classList.contains('bg-black')) {
+          closeDeleteCommentModal();
+        }
+      });
+    }
+
+    // Close delete modals on Escape key
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && !document.getElementById('deletePostModal').classList.contains('hidden')) {
-        closeDeletePostModal();
+      if (e.key === 'Escape') {
+        if (!document.getElementById('deletePostModal').classList.contains('hidden')) {
+          closeDeletePostModal();
+        }
+        if (!document.getElementById('deleteCommentModal').classList.contains('hidden')) {
+          closeDeleteCommentModal();
+        }
       }
     });
   }
@@ -469,8 +485,10 @@ function getCurrentUserEmail() {
     return '';
 }
 
-  // Global variable to store the post ID to be deleted
+  // Global variables to store the IDs to be deleted
   let postToDelete = null;
+  let commentToDelete = null;
+  let postIdForComment = null;
 
   // Function to show delete confirmation modal
   function showDeletePostModal(postId) {
@@ -525,17 +543,37 @@ function getCurrentUserEmail() {
       });
   }
 
-  // Updated deletePost function to use modal
-  function deletePost(postId) {
-    showDeletePostModal(postId);
+  // Function to show delete confirmation modal for comments
+  function showDeleteCommentModal(commentId, postId) {
+    commentToDelete = commentId;
+    postIdForComment = postId;
+    const modal = document.getElementById('deleteCommentModal');
+    modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
   }
 
-  // Function to delete a comment
-  function deleteComment(commentId, postId) {
-    if (!confirm('Are you sure you want to delete this comment?')) {
-      return;
-    }
+  // Function to close delete comment confirmation modal
+  function closeDeleteCommentModal() {
+    const modal = document.getElementById('deleteCommentModal');
+    modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+    commentToDelete = null;
+    postIdForComment = null;
+  }
 
+  // Function to confirm and execute comment deletion
+  function confirmDeleteComment() {
+    if (!commentToDelete || !postIdForComment) return;
+    
+    const commentId = commentToDelete;
+    const postId = postIdForComment;
+    commentToDelete = null;
+    postIdForComment = null;
+    
+    // Close modal first
+    closeDeleteCommentModal();
+    
+    // Execute the deletion
     fetch(`/api/comments/${commentId}`, {
       method: 'DELETE',
       headers: {
@@ -557,6 +595,16 @@ function getCurrentUserEmail() {
         console.error('Error deleting comment:', error);
         showNotification('Error deleting comment. Please try again.', 'error');
       });
+  }
+
+  // Updated deletePost function to use modal
+  function deletePost(postId) {
+    showDeletePostModal(postId);
+  }
+
+  // Function to delete a comment
+  function deleteComment(commentId, postId) {
+    showDeleteCommentModal(commentId, postId);
   }
 
   // Function to show notification
