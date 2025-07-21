@@ -218,6 +218,24 @@
         closeCommentModal();
       }
     });
+
+    // Delete modal event listeners
+    const deleteModal = document.getElementById('deletePostModal');
+    if (deleteModal) {
+      deleteModal.addEventListener('click', function(e) {
+        // Only close if clicking on the backdrop (not the modal content)
+        if (e.target === deleteModal || e.target.classList.contains('bg-black')) {
+          closeDeletePostModal();
+        }
+      });
+    }
+
+    // Close delete modal on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !document.getElementById('deletePostModal').classList.contains('hidden')) {
+        closeDeletePostModal();
+      }
+    });
   }
 
   // Function to fetch and update like status
@@ -451,12 +469,36 @@ function getCurrentUserEmail() {
     return '';
 }
 
-  // Function to delete a post
-  function deletePost(postId) {
-    if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
-      return;
-    }
+  // Global variable to store the post ID to be deleted
+  let postToDelete = null;
 
+  // Function to show delete confirmation modal
+  function showDeletePostModal(postId) {
+    postToDelete = postId;
+    const modal = document.getElementById('deletePostModal');
+    modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+  }
+
+  // Function to close delete confirmation modal
+  function closeDeletePostModal() {
+    const modal = document.getElementById('deletePostModal');
+    modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+    postToDelete = null;
+  }
+
+  // Function to confirm and execute post deletion
+  function confirmDeletePost() {
+    if (!postToDelete) return;
+    
+    const postId = postToDelete;
+    postToDelete = null;
+    
+    // Close modal first
+    closeDeletePostModal();
+    
+    // Execute the deletion
     fetch(`/api/posts/${postId}`, {
       method: 'DELETE',
       headers: {
@@ -481,6 +523,11 @@ function getCurrentUserEmail() {
         console.error('Error deleting post:', error);
         showNotification('Error deleting post. Please try again.', 'error');
       });
+  }
+
+  // Updated deletePost function to use modal
+  function deletePost(postId) {
+    showDeletePostModal(postId);
   }
 
   // Function to delete a comment
