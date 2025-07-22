@@ -110,7 +110,7 @@
         }
     </style>
 </head>
-<body class="bg-brand-50 min-h-screen flex flex-col">
+<body class="flex flex-col min-h-screen bg-brand-50">
 
 <!-- Include the navbar component -->
 <div th:replace="components/navbar :: navbar" class="z-10"></div>
@@ -120,26 +120,26 @@
     <div class="w-full max-w-2xl mx-4 transition-all transform bg-white rounded-lg shadow-xl">
         <div class="relative">
             <!-- Close button -->
-            <button id="closeProfileModal" class="absolute top-4 right-4 text-gray-300 hover:text-white z-10">
+            <button id="closeProfileModal" class="absolute z-10 text-gray-300 top-4 right-4 hover:text-white">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
             
             <!-- Profile Header -->
-            <div class="relative bg-gradient-to-r from-brand-500 to-brand-800 h-32 rounded-t-lg">
+            <div class="relative h-32 rounded-t-lg bg-gradient-to-r from-brand-500 to-brand-800">
                 <div class="absolute -bottom-16 left-6">
-                    <img id="modalProfileImage" src="" alt="Profile" class="w-32 h-32 rounded-full border-4 border-white object-cover">
+                    <img id="modalProfileImage" src="" alt="Profile" class="object-cover w-32 h-32 border-4 border-white rounded-full">
                 </div>
             </div>
             
             <!-- Profile Content -->
-            <div class="pt-20 p-6">
-                <div class="flex justify-between items-start mb-6">
+            <div class="p-6 pt-20">
+                <div class="flex items-start justify-between mb-6">
                     <div>
-                        <h2 id="modalFullName" class="text-2xl font-bold text-gray-800 mb-2">Full Name</h2>
-                        <p id="modalEmail" class="text-gray-600 mb-1">email@example.com</p>
-                        <p id="modalLocation" class="text-gray-500 flex items-center">
+                        <h2 id="modalFullName" class="mb-2 text-2xl font-bold text-gray-800">Full Name</h2>
+                        <p id="modalEmail" class="mb-1 text-gray-600">email@example.com</p>
+                        <p id="modalLocation" class="flex items-center text-gray-500">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -150,10 +150,10 @@
                 </div>
                 
                 <!-- Profile Details -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <!-- Basic Info -->
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <h3 class="font-semibold text-gray-800 mb-3">Basic Information</h3>
+                    <div class="p-4 rounded-lg bg-gray-50">
+                        <h3 class="mb-3 font-semibold text-gray-800">Basic Information</h3>
                         <div class="space-y-2">
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Gender:</span>
@@ -171,8 +171,8 @@
                     </div>
                     
                     <!-- Additional Info -->
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <h3 class="font-semibold text-gray-800 mb-3">Additional Information</h3>
+                    <div class="p-4 rounded-lg bg-gray-50">
+                        <h3 class="mb-3 font-semibold text-gray-800">Additional Information</h3>
                         <div class="space-y-2">
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Education:</span>
@@ -192,10 +192,10 @@
 
 <div class="flex flex-1 overflow-hidden">
     <!-- Left Sidebar -->
-    <div class="w-64 bg-white shadow-lg border-r border-gray-200 h-screen fixed left-0 top-0 pt-16 flex flex-col z-20">
+    <div class="fixed top-0 left-0 z-20 flex flex-col w-64 h-screen pt-16 bg-white border-r border-gray-200 shadow-lg">
         <div class="p-6 border-b border-gray-200">
-            <h1 class="text-2xl font-bold text-gray-800 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <h1 class="flex items-center text-2xl font-bold text-gray-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 Friends
@@ -207,38 +207,38 @@
             <ul class="space-y-2">
                 <li>
                     <button onclick="showSection('all-friends')"
-                            class="nav-item w-full flex items-center px-4 py-3 text-left rounded-lg hover:bg-gray-100 transition-colors active bg-brand-50 text-brand-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            class="flex items-center w-full px-4 py-3 text-left transition-colors rounded-lg nav-item hover:bg-gray-100 active bg-brand-50 text-brand-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                         All Friends
-                        <span class="ml-auto bg-brand-100 text-brand-600 px-2 py-1 rounded-full text-xs">127</span>
+                        <span class="px-2 py-1 ml-auto text-xs rounded-full bg-brand-100 text-brand-600">127</span>
                     </button>
                 </li>
                 <li>
                     <button onclick="showSection('friend-requests')"
-                            class="nav-item w-full flex items-center px-4 py-3 text-left rounded-lg hover:bg-gray-100 transition-colors text-gray-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            class="flex items-center w-full px-4 py-3 text-left text-gray-700 transition-colors rounded-lg nav-item hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                         </svg>
                         Friend Requests
-                        <span class="ml-auto bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs">3</span>
+                        <span class="px-2 py-1 ml-auto text-xs text-red-600 bg-red-100 rounded-full">3</span>
                     </button>
                 </li>
                 <li>
                     <button onclick="showSection('sent-requests')"
-                            class="nav-item w-full flex items-center px-4 py-3 text-left rounded-lg hover:bg-gray-100 transition-colors text-gray-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            class="flex items-center w-full px-4 py-3 text-left text-gray-700 transition-colors rounded-lg nav-item hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                         </svg>
                         Sent Requests
-                        <span class="ml-auto bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">5</span>
+                        <span class="px-2 py-1 ml-auto text-xs text-gray-600 bg-gray-100 rounded-full">5</span>
                     </button>
                 </li>
                 <li>
                     <button onclick="showSection('user-directory')"
-                            class="nav-item w-full flex items-center px-4 py-3 text-left rounded-lg hover:bg-gray-100 transition-colors text-gray-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            class="flex items-center w-full px-4 py-3 text-left text-gray-700 transition-colors rounded-lg nav-item hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                         Find Friends
@@ -250,14 +250,14 @@
     </div>
 
     <!-- Main Content Area -->
-    <div class="flex-1 overflow-y-auto scroll-container ml-64">
+    <div class="flex-1 ml-64 overflow-y-auto scroll-container">
         <!-- All Friends Section -->
         <div id="all-friends" class="content-section">
-            <div  data-theme="light" class="bg-white border-b border-gray-200 p-6 sticky top-0 z-30 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">All Friends</h2>
-                <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
+            <div  data-theme="light" class="sticky top-0 z-30 p-6 bg-white border-b border-gray-200 shadow-sm">
+                <h2 class="mb-4 text-xl font-semibold text-gray-800">All Friends</h2>
+                <div class="flex flex-col items-start space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-4">
                     <div class="relative w-full md:max-w-md">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                         <input  type="text"
@@ -276,7 +276,7 @@
                 <div id="all-friends-container">
                     <!-- Loading indicator -->
                     <div id="loading-friends" class="flex items-center justify-center py-8" style="display: none;">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
+                        <div class="w-8 h-8 border-b-2 rounded-full animate-spin border-brand-600"></div>
                         <span class="ml-3 text-gray-600">Loading friends...</span>
                     </div>
                     
@@ -285,16 +285,16 @@
         </div>
 
         <!-- Friend Requests Section -->
-        <div id="friend-requests" class="content-section hidden">
-            <div class="bg-white border-b border-gray-200 p-6 sticky top-0 z-30 shadow-sm">
+        <div id="friend-requests" class="hidden content-section">
+            <div class="sticky top-0 z-30 p-6 bg-white border-b border-gray-200 shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-800">Friend Requests</h2>
-                <p class="text-gray-600 mt-1">People who want to connect with you</p>
+                <p class="mt-1 text-gray-600">People who want to connect with you</p>
             </div>
 
             <div class="p-6">
                 <div id="friend-requests-container">
                     <div id="loading-requests" class="flex items-center justify-center py-8" style="display: none;">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
+                        <div class="w-8 h-8 border-b-2 rounded-full animate-spin border-brand-600"></div>
                         <span class="ml-3 text-gray-600">Loading requests...</span>
                     </div>
                     
@@ -303,10 +303,10 @@
         </div>
 
         <!-- Sent Requests Section -->
-        <div id="sent-requests" class="content-section hidden">
-            <div class="bg-white border-b border-gray-200 p-6 sticky top-0 z-30 shadow-sm">
+        <div id="sent-requests" class="hidden content-section">
+            <div class="sticky top-0 z-30 p-6 bg-white border-b border-gray-200 shadow-sm">
                 <h2 class="text-xl font-semibold text-gray-800">Sent Requests</h2>
-                <p class="text-gray-600 mt-1">Friend requests you've sent</p>
+                <p class="mt-1 text-gray-600">Friend requests you've sent</p>
             </div>
 
             <div class="p-6">
@@ -314,7 +314,7 @@
                 <div id="sent-requests-container">
                     <!-- Loading indicator -->
                     <div id="loading-sent-requests" class="flex items-center justify-center py-8" style="display: none;">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
+                        <div class="w-8 h-8 border-b-2 rounded-full animate-spin border-brand-600"></div>
                         <span class="ml-3 text-gray-600">Loading sent requests...</span>
                     </div>
                     
@@ -323,12 +323,12 @@
         </div>
 
         <!-- User Directory Section -->
-        <div id="user-directory" class="content-section hidden">
-            <div class="bg-white border-b border-gray-200 p-6 sticky top-0 z-30 shadow-sm">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Find Friends</h2>
-                <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
+        <div id="user-directory" class="hidden content-section">
+            <div class="sticky top-0 z-30 p-6 bg-white border-b border-gray-200 shadow-sm">
+                <h2 class="mb-4 text-xl font-semibold text-gray-800">Find Friends</h2>
+                <div class="flex flex-col items-start space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-4">
                     <div class="relative w-full md:max-w-md">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                         <input type="text" placeholder="Search people..."
@@ -338,7 +338,7 @@
                         />
 
                     </div>
-                    <button class="bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors w-full md:w-auto">
+                    <button class="w-full px-4 py-2 text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700 md:w-auto">
                         Search
                     </button>
                 </div>
@@ -347,14 +347,14 @@
             <div class="p-6">
                 <div id="user-directory-cards" class="space-y-4">
                     <!-- User Directory Cards  -->
-                    <div id="loading-users" class="flex justify-center items-center py-8">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
+                    <div id="loading-users" class="flex items-center justify-center py-8">
+                        <div class="w-8 h-8 border-b-2 rounded-full animate-spin border-brand-600"></div>
                         <span class="ml-3 text-gray-600">Loading users...</span>
                     </div>
                 </div>
 
                 <!-- Pagination -->
-                <div id="user-directory-pagination" class="mt-8 justify-center hidden">
+                <div id="user-directory-pagination" class="justify-center hidden mt-8">
                     <div class="flex space-x-2">
                         <button id="prev-page" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50" disabled>
                             Previous
@@ -566,7 +566,7 @@
     // Function to format location display
     function formatLocationDisplay(city, country) {
         if (!city && !country) {
-            return '<p class="text-xs text-gray-500 mt-1 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Location not specified</p>';
+            return '<p class="flex items-center mt-1 text-xs text-gray-500"><svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Location not specified</p>';
         }
         
         let locationText = '';
@@ -578,7 +578,7 @@
             locationText = country;
         }
         
-        return `<p class="text-xs text-gray-500 mt-1 flex items-center">
+        return `<p class="flex items-center mt-1 text-xs text-gray-500">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -598,20 +598,20 @@
         const locationDisplay = formatLocationDisplay(user.city, user.country);
 
         return `
-            <div class="friend-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+            <div class="p-4 transition-shadow bg-white border border-gray-200 rounded-lg shadow-sm friend-card hover:shadow-md">
                 <div class="flex items-center space-x-4">
-                    <img src="${profileImage}" alt="Profile" class="w-16 h-16 rounded-full object-cover">
+                    <img src="${profileImage}" alt="Profile" class="object-cover w-16 h-16 rounded-full">
                     <div class="flex-1">
                         <h3 class="font-semibold text-gray-800">${fullName}</h3>
                         <p class="text-sm text-gray-600">${user.email}</p>
                         ${locationDisplay}
                     </div>
                     <div class="flex space-x-3">
-                        <button class="bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors"
+                        <button class="px-4 py-2 text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
                                 onclick="addFriend(${user.id}, this)">
                             Add Friend
                         </button>
-                        <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                        <button class="px-4 py-2 text-gray-700 transition-colors bg-gray-200 rounded-lg hover:bg-gray-300"
                                 onclick="viewProfile(${user.id})">
                             View Profile
                         </button>
@@ -649,9 +649,9 @@
 
         if (!users || users.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-8">
+                <div class="py-8 text-center">
                     <div class="text-gray-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                         <p class="text-lg font-medium">No users found</p>
@@ -676,9 +676,9 @@
         
         if (!friends || friends.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-8">
+                <div class="py-8 text-center">
                     <div class="text-gray-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                         <p class="text-lg font-medium">No friends yet</p>
@@ -690,7 +690,7 @@
         }
 
         container.innerHTML = `
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 ${friends.map(friend => createFriendCard(friend)).join('')}
             </div>
         `;
@@ -707,9 +707,9 @@
         
         if (!requests || requests.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-8">
+                <div class="py-8 text-center">
                     <div class="text-gray-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                         </svg>
                         <p class="text-lg font-medium">No friend requests</p>
@@ -738,9 +738,9 @@
         
         if (!requests || requests.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-8">
+                <div class="py-8 text-center">
                     <div class="text-gray-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                         </svg>
                         <p class="text-lg font-medium">No sent requests</p>
@@ -769,16 +769,16 @@
         const locationDisplay = formatLocationDisplay(friend.city, friend.country);
 
         return `
-            <div class="friend-card modern-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm friend-card modern-card">
                 <div class="relative">
-                    <img src="${profileImage}" alt="Profile" class="w-full h-48 object-cover">
+                    <img src="${profileImage}" alt="Profile" class="object-cover w-full h-48">
                     <div class="absolute top-3 right-3">
-                        <span class="online-indicator w-4 h-4 rounded-full border-2 border-white"></span>
+                        <span class="w-4 h-4 border-2 border-white rounded-full online-indicator"></span>
                     </div>
                 </div>
                 <div class="p-4">
-                    <h3 class="font-semibold text-gray-800 mb-1">${fullName}</h3>
-                    <div class="text-sm text-gray-600 mb-3 flex items-center">
+                    <h3 class="mb-1 font-semibold text-gray-800">${fullName}</h3>
+                    <div class="flex items-center mb-3 text-sm text-gray-600">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -786,7 +786,7 @@
                         ${formatLocationText(friend.city, friend.country)}
                     </div>
                     <div class="flex justify-center">
-                        <button class="w-full px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 hover:border-gray-400"
+                        <button class="w-full px-3 py-2 transition-all duration-200 border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400"
                                 onclick="viewProfile(${friend.id})">
                             View Profile
                         </button>
@@ -806,24 +806,24 @@
         const timeAgo = getTimeAgo(request.createdAt);
 
         return `
-            <div class="friend-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+            <div class="p-4 transition-shadow bg-white border border-gray-200 rounded-lg shadow-sm friend-card hover:shadow-md">
                 <div class="flex items-center space-x-4">
-                    <img src="${profileImage}" alt="Profile" class="w-16 h-16 rounded-full object-cover">
+                    <img src="${profileImage}" alt="Profile" class="object-cover w-16 h-16 rounded-full">
                     <div class="flex-1">
                         <h3 class="font-semibold text-gray-800">${fullName}</h3>
                         <p class="text-sm text-gray-600">${sender.email}</p>
-                        <p class="text-xs text-gray-500 mt-1">${timeAgo}</p>
+                        <p class="mt-1 text-xs text-gray-500">${timeAgo}</p>
                     </div>
                     <div class="flex space-x-3">
-                        <button class="bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors"
+                        <button class="px-4 py-2 text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
                                 onclick="acceptFriendRequest(${request.id})">
                             Accept
                         </button>
-                        <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                        <button class="px-4 py-2 text-gray-700 transition-colors bg-gray-200 rounded-lg hover:bg-gray-300"
                                 onclick="declineFriendRequest(${request.id})">
                             Decline
                         </button>
-                        <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                        <button class="px-4 py-2 text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700"
                                 onclick="viewProfile(${sender.id})">
                             View Profile
                         </button>
@@ -843,16 +843,16 @@
         const timeAgo = getTimeAgo(request.createdAt);
 
         return `
-            <div class="friend-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+            <div class="p-4 transition-shadow bg-white border border-gray-200 rounded-lg shadow-sm friend-card hover:shadow-md">
                 <div class="flex items-center space-x-4">
-                    <img src="${profileImage}" alt="Profile" class="w-16 h-16 rounded-full object-cover">
+                    <img src="${profileImage}" alt="Profile" class="object-cover w-16 h-16 rounded-full">
                     <div class="flex-1">
                         <h3 class="font-semibold text-gray-800">${fullName}</h3>
                         <p class="text-sm text-gray-600">${receiver.email}</p>
-                        <p class="text-xs text-gray-500 mt-1">Sent ${timeAgo}</p>
+                        <p class="mt-1 text-xs text-gray-500">Sent ${timeAgo}</p>
                     </div>
                     <div class="flex space-x-3">
-                        <button class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                        <button class="px-4 py-2 text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700"
                                 onclick="cancelFriendRequest(${request.id})">
                             Cancel Request
                         </button>
@@ -936,14 +936,14 @@
             // Handle error case
             const container = document.getElementById('user-directory-cards');
             container.innerHTML = `
-                <div class="text-center py-8">
+                <div class="py-8 text-center">
                     <div class="text-red-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <p class="text-lg font-medium">Error loading users</p>
                         <p class="text-sm">Please check your connection and try again</p>
-                        <button onclick="loadUsersPage(0)" class="mt-4 bg-brand-600 text-white px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors">
+                        <button onclick="loadUsersPage(0)" class="px-4 py-2 mt-4 text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700">
                             Retry
                         </button>
                     </div>
@@ -990,7 +990,7 @@
                 // Update the button text and style
                 button.textContent = 'Request Sent';
                 button.classList.remove('bg-brand-600', 'hover:bg-brand-700');
-                button.classList.add('bg-gray-400', 'cursor-not-allowed');
+                button.classList.add('bg-gray-100', 'cursor-not-allowed');
                 button.disabled = true;
                 
                 // Show success message
