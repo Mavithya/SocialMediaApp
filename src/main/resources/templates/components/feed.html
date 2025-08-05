@@ -1,4 +1,4 @@
-<div th:fragment="feed" class="flex-1 max-w-2xl" xmlns:sec="http://www.w3.org/1999/xhtml">
+<div th:fragment="feed" class="flex-1" xmlns:sec="http://www.w3.org/1999/xhtml">
     <!-- Create Post Form -->
     <form th:action="@{/posts}" method="post" class="mb-6 bg-gray-800 shadow-xl card ">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
