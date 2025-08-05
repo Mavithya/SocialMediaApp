@@ -132,9 +132,7 @@
                     <div class="flex items-center gap-2 mb-2">
                         <h3 class="font-semibold text-black"
                             th:text="${post.user.firstName} + ' ' + ${post.user.lastName}">Author Name</h3>
-                        <span class="text-gray-400" th:text="'@' + ${post.user.email.split('@')[0]}">@username</span>
-                        <span class="text-gray-500">•</span>
-                        <span class="text-sm text-gray-400" th:text="${#temporals.format(post.createdAt, 'MMM dd, yyyy HH:mm')}">timestamp</span>
+                        <span class="text-sm text-gray-400" th:text="${post.timeAgo}">timestamp</span>
 
                         <!-- Delete button for post owner -->
                         <div class="ml-auto" sec:authorize="isAuthenticated()">

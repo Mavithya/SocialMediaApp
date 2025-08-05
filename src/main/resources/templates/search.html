@@ -142,9 +142,7 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center mb-2 space-x-2">
                                     <h3 th:text="${post.user.firstName + ' ' + post.user.lastName}" class="font-semibold text-gray-900"></h3>
-                                    <span th:if="${post.user.username}" th:text="'@' + ${post.user.username}" class="text-sm text-gray-500"></span>
-                                    <span class="text-sm text-gray-400">•</span>
-                                    <span th:text="${#temporals.format(post.createdAt, 'MMM dd, yyyy')}" class="text-sm text-gray-500"></span>
+                                    <span th:text="${post.timeAgo}" class="text-sm text-gray-500"></span>
                                 </div>
                                 <p th:text="${post.content}" class="text-gray-800 whitespace-pre-wrap"></p>
                                 <div class="flex items-center mt-4 space-x-6 text-gray-500">

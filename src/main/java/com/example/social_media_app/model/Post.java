@@ -1,6 +1,7 @@
 package com.example.social_media_app.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.example.social_media_app.util.TimeUtil;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -63,5 +64,15 @@ public class Post {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+    
+    // Helper method for displaying time in Facebook-style format
+    public String getTimeAgo() {
+        return TimeUtil.getTimeAgo(this.createdAt);
+    }
+    
+    // Helper method for verbose time display
+    public String getVerboseTimeAgo() {
+        return TimeUtil.getVerboseTimeAgo(this.createdAt);
     }
 }
