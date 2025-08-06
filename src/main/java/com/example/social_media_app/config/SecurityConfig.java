@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .userDetailsService(customUserDetailsService) // Ensure Spring Security uses your custom service
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/login", "/register", "/error").permitAll()
-                        .requestMatchers("/api/users/**", "/api/friends/**").authenticated() // Secure API routes
+                        .requestMatchers("/api/users/**", "/api/friends/**", "/api/notifications/**", "/api/comments/**", "/api/posts/**").authenticated() // Secure API routes
                         .anyRequest().authenticated() // Secure all other routes
                 )
                 .formLogin(form -> form
