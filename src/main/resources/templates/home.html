@@ -1024,6 +1024,27 @@ function getCurrentUserEmail() {
     const mediaGrid = document.getElementById('mediaGrid');
     
     if (input.files && input.files.length > 0) {
+      // Validate file sizes before processing
+      const maxImageSize = 10 * 1024 * 1024; // 10MB
+      const maxVideoSize = 50 * 1024 * 1024; // 50MB
+      const invalidFiles = [];
+      
+      Array.from(input.files).forEach(file => {
+        const isVideo = file.type.startsWith('video/');
+        const maxSize = isVideo ? maxVideoSize : maxImageSize;
+        const maxSizeStr = isVideo ? '50MB' : '10MB';
+        
+        if (file.size > maxSize) {
+          invalidFiles.push(`${file.name} (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds ${maxSizeStr} limit`);
+        }
+      });
+      
+      if (invalidFiles.length > 0) {
+        showNotification('File size errors:\n' + invalidFiles.join('\n'), 'error');
+        input.value = ''; // Clear the input
+        return;
+      }
+      
       mediaPreview.classList.remove('hidden');
       
       // Clear existing previews

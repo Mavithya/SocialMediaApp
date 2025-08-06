@@ -31,7 +31,12 @@ public class FileUploadServiceImpl implements FileUploadService {
             "video/mp4", "video/avi", "video/mov", "video/wmv", "video/webm"
     );
 
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    private static final String FILE_TYPE_VIDEO = "video";
+    private static final String FILE_TYPE_IMAGE = "image";
+    private static final String UPLOADS_PATH = "/uploads/";
+    
+    private static final long MAX_IMAGE_SIZE = 10L * 1024 * 1024; // 10MB for images
+    private static final long MAX_VIDEO_SIZE = 50L * 1024 * 1024; // 50MB for videos
 
     @Override
     public String uploadFile(MultipartFile file, String directory) throws IOException {
@@ -43,8 +48,13 @@ public class FileUploadServiceImpl implements FileUploadService {
             throw new IOException("File type not allowed: " + file.getContentType());
         }
 
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IOException("File size exceeds maximum allowed size of 10MB");
+        // Check file size based on type
+        String fileTypeCategory = getFileTypeCategory(file);
+        long maxSize = FILE_TYPE_VIDEO.equals(fileTypeCategory) ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
+        
+        if (file.getSize() > maxSize) {
+            String maxSizeStr = FILE_TYPE_VIDEO.equals(fileTypeCategory) ? "50MB" : "10MB";
+            throw new IOException("File size exceeds maximum allowed size of " + maxSizeStr);
         }
 
         // Create directory if it doesn't exist
@@ -68,7 +78,7 @@ public class FileUploadServiceImpl implements FileUploadService {
         log.info("File uploaded successfully: {}", filePath);
 
         // Return path relative to static resources
-        return "/uploads/" + directory + "/" + uniqueFilename;
+        return UPLOADS_PATH + directory + "/" + uniqueFilename;
     }
 
     @Override
@@ -89,8 +99,8 @@ public class FileUploadServiceImpl implements FileUploadService {
     public boolean deleteFile(String filePath) {
         try {
             // Remove the leading slash and "uploads/" to get the path relative to upload dir
-            String relativePath = filePath.startsWith("/uploads/") ? 
-                    filePath.substring("/uploads/".length()) : filePath;
+            String relativePath = filePath.startsWith(UPLOADS_PATH) ? 
+                    filePath.substring(UPLOADS_PATH.length()) : filePath;
             
             Path fileToDelete = Paths.get(uploadDir, relativePath);
             boolean deleted = Files.deleteIfExists(fileToDelete);
@@ -123,9 +133,9 @@ public class FileUploadServiceImpl implements FileUploadService {
         }
         
         if (ALLOWED_IMAGE_TYPES.contains(contentType)) {
-            return "image";
+            return FILE_TYPE_IMAGE;
         } else if (ALLOWED_VIDEO_TYPES.contains(contentType)) {
-            return "video";
+            return FILE_TYPE_VIDEO;
         } else {
             return "unknown";
         }
