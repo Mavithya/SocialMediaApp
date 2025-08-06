@@ -177,7 +177,94 @@
 
                 <!-- Post content -->
                 <div class="mb-4 post-content-scroll">
-                    <p class="text-gray-700 break-words whitespace-pre-wrap" th:text="${post.content}">Post content…</p>
+                    <p class="text-gray-700 break-words whitespace-pre-wrap" th:text="${post.content}" 
+                       th:if="${!#strings.isEmpty(post.content)}">Post content…</p>
+                </div>
+
+                <!-- Media attachments -->
+                <div th:if="${post.mediaFiles != null and !post.mediaFiles.isEmpty()}" class="mb-4">
+                    <div th:switch="${#lists.size(post.mediaFiles)}">
+                        <!-- Single media item -->
+                        <div th:case="1" class="relative">
+                            <div th:each="media : ${post.mediaFiles}">
+                                <div th:if="${media.fileType == 'image'}" class="relative">
+                                    <img th:src="${media.filePath}" 
+                                         th:alt="${media.fileName}" 
+                                         class="w-full max-h-96 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                                         onclick="openImageModal(this.src)"/>
+                                </div>
+                                <div th:if="${media.fileType == 'video'}" class="relative">
+                                    <video controls class="w-full max-h-96 rounded-lg border border-gray-200">
+                                        <source th:src="${media.filePath}" th:type="${media.mimeType}"/>
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Two media items -->
+                        <div th:case="2" class="grid grid-cols-2 gap-2">
+                            <div th:each="media : ${post.mediaFiles}" class="relative">
+                                <div th:if="${media.fileType == 'image'}" class="relative">
+                                    <img th:src="${media.filePath}" 
+                                         th:alt="${media.fileName}" 
+                                         class="w-full h-48 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                                         onclick="openImageModal(this.src)"/>
+                                </div>
+                                <div th:if="${media.fileType == 'video'}" class="relative">
+                                    <video controls class="w-full h-48 rounded-lg border border-gray-200">
+                                        <source th:src="${media.filePath}" th:type="${media.mimeType}"/>
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Three or more media items -->
+                        <div th:case="*" class="grid grid-cols-2 gap-2">
+                            <!-- First two media items -->
+                            <div th:each="media, iterStat : ${post.mediaFiles}" 
+                                 th:if="${iterStat.index < 2}" class="relative">
+                                <div th:if="${media.fileType == 'image'}" class="relative">
+                                    <img th:src="${media.filePath}" 
+                                         th:alt="${media.fileName}" 
+                                         class="w-full h-48 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                                         onclick="openImageModal(this.src)"/>
+                                </div>
+                                <div th:if="${media.fileType == 'video'}" class="relative">
+                                    <video controls class="w-full h-48 rounded-lg border border-gray-200">
+                                        <source th:src="${media.filePath}" th:type="${media.mimeType}"/>
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            </div>
+                            
+                            <!-- Show "+X more" overlay on the second item if there are more than 2 items -->
+                            <div th:if="${#lists.size(post.mediaFiles) > 2}" 
+                                 class="relative col-start-2 row-start-1">
+                                <div th:with="secondMedia=${post.mediaFiles[1]}">
+                                    <div th:if="${secondMedia.fileType == 'image'}" class="relative">
+                                        <img th:src="${secondMedia.filePath}" 
+                                             th:alt="${secondMedia.fileName}" 
+                                             class="w-full h-48 object-cover rounded-lg border border-gray-200"/>
+                                        <div class="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
+                                            <span class="text-white text-xl font-bold" 
+                                                  th:text="'+' + ${#lists.size(post.mediaFiles) - 2} + ' more'">+X more</span>
+                                        </div>
+                                    </div>
+                                    <div th:if="${secondMedia.fileType == 'video'}" class="relative">
+                                        <video class="w-full h-48 rounded-lg border border-gray-200">
+                                            <source th:src="${secondMedia.filePath}" th:type="${secondMedia.mimeType}"/>
+                                        </video>
+                                        <div class="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
+                                            <span class="text-white text-xl font-bold" 
+                                                  th:text="'+' + ${#lists.size(post.mediaFiles) - 2} + ' more'">+X more</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Action buttons -->
@@ -264,6 +351,20 @@
                     </div>
                 </form>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal for full-size viewing -->
+<div id="imageModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-90 backdrop-blur-sm">
+    <div class="flex items-center justify-center w-full h-full p-4">
+        <div class="relative max-w-4xl max-h-full">
+            <button id="closeImageModal" class="absolute top-2 right-2 z-10 p-2 text-white bg-black bg-opacity-50 rounded-full hover:bg-opacity-70">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <img id="modalImage" src="" alt="Full size view" class="max-w-full max-h-full rounded-lg">
         </div>
     </div>
 </div>

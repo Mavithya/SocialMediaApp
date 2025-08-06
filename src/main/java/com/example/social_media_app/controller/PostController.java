@@ -10,7 +10,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -22,16 +25,22 @@ public class PostController {
     @PostMapping("/posts")
     public String createPost(
             @RequestParam("content") String content,
+            @RequestParam(value = "mediaFiles", required = false) List<MultipartFile> mediaFiles,
             @AuthenticationPrincipal UserDetails userDetails,
             RedirectAttributes redirectAttributes
     ) {
-        // Validate content
-        if (content == null || content.trim().isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", "Post content cannot be empty. Please write something before posting.");
+        // Validate that there's either content or media files
+        boolean hasContent = content != null && !content.trim().isEmpty();
+        boolean hasMedia = mediaFiles != null && !mediaFiles.isEmpty() && 
+                          mediaFiles.stream().anyMatch(file -> !file.isEmpty());
+        
+        if (!hasContent && !hasMedia) {
+            redirectAttributes.addFlashAttribute("error", "Post cannot be empty. Please add some content or attach media.");
             return "redirect:/home";
         }
         
-        if (content.trim().length() > 280) {
+        // Validate content length if present
+        if (hasContent && content.trim().length() > 280) {
             redirectAttributes.addFlashAttribute("error", "Post content is too long. Please keep it under 280 characters.");
             return "redirect:/home";
         }
@@ -43,7 +52,16 @@ public class PostController {
                 return "redirect:/home";
             }
             
-            postService.createPost(content.trim(), author);
+            // Use empty string for content if not provided
+            String postContent = hasContent ? content.trim() : "";
+            
+            // Create post with media files
+            if (hasMedia) {
+                postService.createPost(postContent, author, mediaFiles);
+            } else {
+                postService.createPost(postContent, author);
+            }
+            
             redirectAttributes.addFlashAttribute("success", "Post created successfully!");
             return "redirect:/home";
         } catch (Exception e) {
