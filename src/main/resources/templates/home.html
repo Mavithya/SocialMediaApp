@@ -329,29 +329,40 @@
     modal.classList.remove('hidden');
     document.body.classList.add('overflow-hidden');
     
-    // Fetch post details - FIX: Use correct CSS selectors for light theme
+    // Fetch post details - Fixed CSS selectors for light theme
     const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
-    const authorName = postCard.querySelector('h3').textContent;
-    const postTime = postCard.querySelector('.text-sm.text-gray-400').textContent;
-    const postContent = postCard.querySelector('p.text-gray-700').textContent; // Changed from text-gray-300 to text-gray-700
+    
+    if (postCard) {
+      // Get author name - updated selector
+      const authorNameElement = postCard.querySelector('h3.font-semibold.text-black');
+      const authorName = authorNameElement ? authorNameElement.textContent : 'Unknown Author';
+      
+      // Get post time - updated selector  
+      const postTimeElement = postCard.querySelector('span.text-sm.text-gray-500');
+      const postTime = postTimeElement ? postTimeElement.textContent : '';
+      
+      // Get post content - updated selector
+      const postContentElement = postCard.querySelector('p.text-gray-700.break-words.whitespace-pre-wrap');
+      const postContent = postContentElement ? postContentElement.textContent : '';
 
-    // Update modal content
-    document.getElementById('modalPostAuthor').textContent = authorName;
-    document.getElementById('modalPostTime').textContent = postTime;
-    document.getElementById('modalPostText').textContent = postContent;
-    
-    // Update modal avatar with post author's profile picture
-    const modalAvatarContainer = document.querySelector('#modalPostContent .avatar > div');
-    const postAvatar = postCard.querySelector('.avatar img');
-    
-    if (postAvatar) {
+      // Update modal content
+      document.getElementById('modalPostAuthor').textContent = authorName;
+      document.getElementById('modalPostTime').textContent = postTime;
+      document.getElementById('modalPostText').textContent = postContent;
+
+      // Update modal avatar with post author's profile picture
+      const modalAvatarContainer = document.querySelector('#modalPostContent .avatar > div');
+      const postAvatar = postCard.querySelector('.avatar img');
+      
+      if (postAvatar && modalAvatarContainer) {
         // Post author has a profile picture
         modalAvatarContainer.innerHTML = `<img src="${postAvatar.src}" alt="Profile" class="object-cover w-full h-full rounded-full"/>`;
-    } else {
+      } else if (modalAvatarContainer) {
         // Use default avatar
         modalAvatarContainer.innerHTML = `<svg class="mt-2 ml-[10px] w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
         </svg>`;
+      }
     }
     
     // Fetch comments IMMEDIATELY when modal opens
