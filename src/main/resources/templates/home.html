@@ -363,6 +363,152 @@
             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
         </svg>`;
       }
+
+      // Handle media attachments
+      const modalPostMedia = document.getElementById('modalPostMedia');
+      const postMediaContainer = postCard.querySelector('div:has(> div[th\\:if])'); // Find media container in post
+      
+      // Clear previous media content
+      modalPostMedia.innerHTML = '';
+      modalPostMedia.classList.add('hidden');
+      
+      // Check if post has media attachments by looking for images or videos in the post
+      const postImages = postCard.querySelectorAll('img[onclick*="openImageModal"]');
+      const postVideos = postCard.querySelectorAll('video');
+      
+      if (postImages.length > 0 || postVideos.length > 0) {
+        modalPostMedia.classList.remove('hidden');
+        
+        // Create media container based on number of media items
+        const totalMedia = postImages.length + postVideos.length;
+        
+        if (totalMedia === 1) {
+          // Single media item
+          modalPostMedia.className = 'mt-3 relative';
+          
+          if (postImages.length > 0) {
+            const img = postImages[0];
+            modalPostMedia.innerHTML = `
+              <img src="${img.src}" alt="${img.alt || 'Post image'}" 
+                   class="w-full max-h-64 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                   onclick="openImageModal('${img.src}')"/>
+            `;
+          } else if (postVideos.length > 0) {
+            const video = postVideos[0];
+            const source = video.querySelector('source');
+            modalPostMedia.innerHTML = `
+              <video controls class="w-full max-h-64 rounded-lg border border-gray-200">
+                <source src="${source.src}" type="${source.type}"/>
+                Your browser does not support the video tag.
+              </video>
+            `;
+          }
+        } else if (totalMedia === 2) {
+          // Two media items
+          modalPostMedia.className = 'mt-3 grid grid-cols-2 gap-2';
+          let mediaHtml = '';
+          
+          // Add images
+          postImages.forEach(img => {
+            mediaHtml += `
+              <div class="relative">
+                <img src="${img.src}" alt="${img.alt || 'Post image'}" 
+                     class="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                     onclick="openImageModal('${img.src}')"/>
+              </div>
+            `;
+          });
+          
+          // Add videos
+          postVideos.forEach(video => {
+            const source = video.querySelector('source');
+            mediaHtml += `
+              <div class="relative">
+                <video controls class="w-full h-32 rounded-lg border border-gray-200">
+                  <source src="${source.src}" type="${source.type}"/>
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            `;
+          });
+          
+          modalPostMedia.innerHTML = mediaHtml;
+        } else {
+          // Three or more media items - show first two with "+X more" overlay
+          modalPostMedia.className = 'mt-3 grid grid-cols-2 gap-2';
+          let mediaHtml = '';
+          let mediaCount = 0;
+          
+          // Add first image if exists
+          if (postImages.length > 0 && mediaCount < 2) {
+            const img = postImages[0];
+            mediaHtml += `
+              <div class="relative">
+                <img src="${img.src}" alt="${img.alt || 'Post image'}" 
+                     class="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                     onclick="openImageModal('${img.src}')"/>
+              </div>
+            `;
+            mediaCount++;
+          }
+          
+          // Add first video if exists and we need more
+          if (postVideos.length > 0 && mediaCount < 2) {
+            const video = postVideos[0];
+            const source = video.querySelector('source');
+            mediaHtml += `
+              <div class="relative">
+                <video controls class="w-full h-32 rounded-lg border border-gray-200">
+                  <source src="${source.src}" type="${source.type}"/>
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            `;
+            mediaCount++;
+          }
+          
+          // Add second media item with overlay if there are more than 2 total
+          if (mediaCount < 2) {
+            if (postImages.length > 1) {
+              const img = postImages[1];
+              mediaHtml += `
+                <div class="relative">
+                  <img src="${img.src}" alt="${img.alt || 'Post image'}" 
+                       class="w-full h-32 object-cover rounded-lg border border-gray-200"/>
+                  <div class="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
+                    <span class="text-white text-lg font-bold">+${totalMedia - 2} more</span>
+                  </div>
+                </div>
+              `;
+            } else if (postVideos.length > 1) {
+              const video = postVideos[1];
+              const source = video.querySelector('source');
+              mediaHtml += `
+                <div class="relative">
+                  <video class="w-full h-32 rounded-lg border border-gray-200">
+                    <source src="${source.src}" type="${source.type}"/>
+                  </video>
+                  <div class="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
+                    <span class="text-white text-lg font-bold">+${totalMedia - 2} more</span>
+                  </div>
+                </div>
+              `;
+            }
+          } else if (totalMedia > 2) {
+            // If we already have 2 items, add overlay to the second one
+            const existingSecond = modalPostMedia.lastElementChild;
+            if (existingSecond) {
+              existingSecond.innerHTML += `
+                <div class="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
+                  <span class="text-white text-lg font-bold">+${totalMedia - 2} more</span>
+                </div>
+              `;
+            }
+          }
+          
+          modalPostMedia.innerHTML = mediaHtml;
+        }
+      }
     }
     
     // Fetch comments IMMEDIATELY when modal opens
@@ -375,6 +521,13 @@
     modal.classList.add('hidden');
     document.body.classList.remove('overflow-hidden');
     document.getElementById('commentContent').value = '';
+    
+    // Clear modal post media content
+    const modalPostMedia = document.getElementById('modalPostMedia');
+    if (modalPostMedia) {
+      modalPostMedia.innerHTML = '';
+      modalPostMedia.classList.add('hidden');
+    }
   }
 
   // Function to fetch comments
