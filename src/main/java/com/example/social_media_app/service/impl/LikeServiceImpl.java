@@ -6,6 +6,7 @@ import com.example.social_media_app.model.User;
 import com.example.social_media_app.repository.LikeRepository;
 import com.example.social_media_app.repository.PostRepository;
 import com.example.social_media_app.service.LikeService;
+import com.example.social_media_app.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ public class LikeServiceImpl implements LikeService {
 
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -41,6 +43,9 @@ public class LikeServiceImpl implements LikeService {
             // Update like count in post
             post.setLikeCount(post.getLikeCount() + 1);
             postRepository.save(post);
+            
+            // Send notification to post owner (if not liking own post)
+            notificationService.notifyPostLiked(post.getUser(), user, post.getId());
             
             return true;
         }

@@ -7,6 +7,7 @@ import com.example.social_media_app.repository.FriendRequestRepository;
 import com.example.social_media_app.repository.FriendshipRepository;
 import com.example.social_media_app.repository.UserRepository;
 import com.example.social_media_app.service.FriendRequestService;
+import com.example.social_media_app.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     private final FriendRequestRepository friendRequestRepository;
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
     
     @Override
     public FriendRequest sendFriendRequest(Long senderId, Long receiverId) {
@@ -52,7 +54,12 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 .status(FriendRequest.FriendRequestStatus.PENDING)
                 .build();
         
-        return friendRequestRepository.save(friendRequest);
+        FriendRequest savedRequest = friendRequestRepository.save(friendRequest);
+        
+        // Send notification to receiver
+        notificationService.notifyFriendRequestReceived(receiver, sender, savedRequest.getId());
+        
+        return savedRequest;
     }
     
     @Override
@@ -81,6 +88,9 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 .build();
         
         friendshipRepository.save(friendship);
+        
+        // Send notification to the original sender
+        notificationService.notifyFriendRequestAccepted(request.getSender(), request.getReceiver(), requestId);
     }
     
     @Override
@@ -101,6 +111,9 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         // Update request status
         request.setStatus(FriendRequest.FriendRequestStatus.DECLINED);
         friendRequestRepository.save(request);
+        
+        // Send notification to the original sender
+        notificationService.notifyFriendRequestDeclined(request.getSender(), request.getReceiver(), requestId);
     }
     
     @Override

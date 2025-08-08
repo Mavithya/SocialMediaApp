@@ -39,12 +39,34 @@
 
             </a>
 
-            <button class="btn btn-ghost btn-circle relative text-gray-600  bg-gray-200 hover:bg-gray-300">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
-                </svg>
-                <span class="badge badge-sm badge-primary absolute -top-1 -right-1 !bg-brand-500 border-none">2</span>
-            </button>
+            <!-- Notifications Dropdown -->
+            <div class="dropdown dropdown-end">
+                <button id="notificationBtn" class="btn btn-ghost btn-circle relative text-gray-600 bg-gray-200 hover:bg-gray-300">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                    </svg>
+                    <span id="notificationCount" class="badge badge-sm badge-primary absolute -top-1 -right-1 !bg-brand-500 border-none hidden">0</span>
+                </button>
+                
+                <!-- Notification Modal/Dropdown -->
+                <div id="notificationDropdown" class="dropdown-content mt-3 z-[100] card card-compact w-80 bg-white shadow-xl border border-gray-300 hidden">
+                    <div class="card-body p-0">
+                        <div class="flex items-center justify-between p-4 border-b">
+                            <h3 class="font-semibold text-lg text-gray-900">Notifications</h3>
+                            <button id="markAllReadBtn" class="text-sm text-blue-600 hover:text-blue-800">Mark all read</button>
+                        </div>
+                        <div id="notificationsList" class="max-h-96 overflow-y-auto">
+                            <!-- Notifications will be loaded here -->
+                            <div class="p-4 text-center text-gray-500">
+                                <svg class="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5v-6h0v6z"/>
+                                </svg>
+                                Loading notifications...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Logout Button -->
             <div class="dropdown dropdown-end">
                 <label tabindex="0" class="btn btn-ghost btn-circle text-gray-600 bg-gray-200 hover:bg-gray-300" title="Logout">
@@ -94,6 +116,244 @@ document.addEventListener('DOMContentLoaded', function() {
     const suggestionsDropdown = document.getElementById('searchSuggestions');
     const suggestionContent = document.getElementById('suggestionContent');
     let searchTimeout;
+
+    // Notification functionality
+    const notificationBtn = document.getElementById('notificationBtn');
+    const notificationDropdown = document.getElementById('notificationDropdown');
+    const notificationCount = document.getElementById('notificationCount');
+    const notificationsList = document.getElementById('notificationsList');
+    const markAllReadBtn = document.getElementById('markAllReadBtn');
+    
+    let isNotificationDropdownOpen = false;
+
+    // Initialize notifications
+    if (notificationBtn && notificationDropdown) {
+        // Load notification count on page load
+        loadNotificationCount();
+        
+        // Load notification count every 30 seconds
+        setInterval(loadNotificationCount, 30000);
+
+        // Toggle notification dropdown
+        notificationBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (isNotificationDropdownOpen) {
+                hideNotifications();
+            } else {
+                showNotifications();
+                loadNotifications();
+            }
+        });
+
+        // Mark all as read
+        markAllReadBtn.addEventListener('click', function() {
+            markAllNotificationsAsRead();
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
+                hideNotifications();
+            }
+        });
+    }
+
+    function loadNotificationCount() {
+        const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+        const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+        
+        const headers = {
+            'X-Requested-With': 'XMLHttpRequest'
+        };
+        
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+
+        fetch('/api/notifications/count', {
+            method: 'GET',
+            headers: headers
+        })
+        .then(response => response.json())
+        .then(data => {
+            const count = data.count || 0;
+            updateNotificationCount(count);
+        })
+        .catch(error => {
+            console.error('Error loading notification count:', error);
+        });
+    }
+
+    function updateNotificationCount(count) {
+        if (count > 0) {
+            notificationCount.textContent = count > 99 ? '99+' : count;
+            notificationCount.classList.remove('hidden');
+        } else {
+            notificationCount.classList.add('hidden');
+        }
+    }
+
+    function showNotifications() {
+        notificationDropdown.classList.remove('hidden');
+        isNotificationDropdownOpen = true;
+    }
+
+    function hideNotifications() {
+        notificationDropdown.classList.add('hidden');
+        isNotificationDropdownOpen = false;
+    }
+
+    function loadNotifications() {
+        const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+        const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+        
+        const headers = {
+            'X-Requested-With': 'XMLHttpRequest'
+        };
+        
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+
+        fetch('/api/notifications?page=0&size=10', {
+            method: 'GET',
+            headers: headers
+        })
+        .then(response => response.json())
+        .then(data => {
+            displayNotifications(data.content || []);
+        })
+        .catch(error => {
+            console.error('Error loading notifications:', error);
+            notificationsList.innerHTML = '<div class="p-4 text-center text-red-500">Error loading notifications</div>';
+        });
+    }
+
+    function displayNotifications(notifications) {
+        if (notifications.length === 0) {
+            notificationsList.innerHTML = `
+                <div class="p-4 text-center text-gray-500">
+                    <svg class="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8v.01M6 8v.01"/>
+                    </svg>
+                    <p>No notifications yet</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        notifications.forEach(notification => {
+            const timeAgo = formatTimeAgo(new Date(notification.createdAt));
+            const isUnread = !notification.isRead;
+            const avatar = notification.actor.profilePicture 
+                ? `<img src="/uploads/profiles/${notification.actor.profilePicture}" alt="${notification.actor.firstName} ${notification.actor.lastName}" class="w-10 h-10 rounded-full object-cover">`
+                : `<div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+                     <span class="text-white text-sm font-semibold">${notification.actor.firstName.charAt(0)}${notification.actor.lastName.charAt(0)}</span>
+                   </div>`;
+
+            html += `
+                <div class="notification-item p-4 border-b hover:bg-gray-50 cursor-pointer ${isUnread ? 'bg-blue-50' : ''}" 
+                     onclick="markNotificationAsRead(${notification.id})" data-notification-id="${notification.id}">
+                    <div class="flex items-start space-x-3">
+                        ${avatar}
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm text-gray-900">
+                                <span class="font-medium">${notification.actor.firstName} ${notification.actor.lastName}</span>
+                                ${notification.message}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">${timeAgo}</p>
+                        </div>
+                        ${isUnread ? '<div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>' : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        notificationsList.innerHTML = html;
+    }
+
+    function markNotificationAsRead(notificationId) {
+        const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+        const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+        
+        const headers = {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json'
+        };
+        
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+
+        fetch(`/api/notifications/${notificationId}/read`, {
+            method: 'PUT',
+            headers: headers
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update UI
+                const notificationElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
+                if (notificationElement) {
+                    notificationElement.classList.remove('bg-blue-50');
+                    const unreadDot = notificationElement.querySelector('.w-2.h-2.bg-blue-500');
+                    if (unreadDot) {
+                        unreadDot.remove();
+                    }
+                }
+                // Reload count
+                loadNotificationCount();
+            }
+        })
+        .catch(error => {
+            console.error('Error marking notification as read:', error);
+        });
+    }
+
+    function markAllNotificationsAsRead() {
+        const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+        const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+        
+        const headers = {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json'
+        };
+        
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+
+        fetch('/api/notifications/read-all', {
+            method: 'PUT',
+            headers: headers
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload notifications and count
+                loadNotifications();
+                loadNotificationCount();
+            }
+        })
+        .catch(error => {
+            console.error('Error marking all notifications as read:', error);
+        });
+    }
+
+    function formatTimeAgo(date) {
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        
+        if (diffInSeconds < 60) return 'Just now';
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+        if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+        return date.toLocaleDateString();
+    }
+
+    // Make functions global for onclick handlers
+    window.markNotificationAsRead = markNotificationAsRead;
 
     if (searchInput && suggestionsDropdown && suggestionContent) {
         // Show suggestions on input
