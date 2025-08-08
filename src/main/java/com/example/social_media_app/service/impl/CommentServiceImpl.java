@@ -83,7 +83,7 @@ public class CommentServiceImpl implements CommentService {
         postRepository.save(post);
         
         // Send notification to post owner (if not commenting on own post)
-        if (comment.getId() == null) { // Only for new comments
+        if (comment.getId() == null && !post.getUser().getId().equals(comment.getUser().getId())) { // Only for new comments and not self-comments
             notificationService.notifyPostCommented(post.getUser(), comment.getUser(), 
                                                    post.getId(), savedComment.getId());
         }

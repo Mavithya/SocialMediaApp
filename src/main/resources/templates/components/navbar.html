@@ -41,7 +41,7 @@
 
             <!-- Notifications Dropdown -->
             <div class="dropdown dropdown-end">
-                <button id="notificationBtn" class="btn btn-ghost btn-circle relative text-gray-600 bg-gray-200 hover:bg-gray-300">
+                <button id="notificationBtn" class="btn btn-ghost btn-circle relative text-gray-600 bg-gray-200 hover:bg-gray-300" onclick="toggleNotifications()">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
                     </svg>
@@ -53,7 +53,7 @@
                     <div class="card-body p-0">
                         <div class="flex items-center justify-between p-4 border-b">
                             <h3 class="font-semibold text-lg text-gray-900">Notifications</h3>
-                            <button id="markAllReadBtn" class="text-sm text-blue-600 hover:text-blue-800">Mark all read</button>
+                            <button id="markAllReadBtn" class="text-sm text-blue-600 hover:text-blue-800" onclick="markAllNotificationsRead()">Mark all read</button>
                         </div>
                         <div id="notificationsList" class="max-h-96 overflow-y-auto">
                             <!-- Notifications will be loaded here -->
@@ -354,6 +354,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Make functions global for onclick handlers
     window.markNotificationAsRead = markNotificationAsRead;
+    window.toggleNotifications = function() {
+        if (isNotificationDropdownOpen) {
+            hideNotifications();
+        } else {
+            showNotifications();
+            loadNotifications();
+        }
+    };
+    window.markAllNotificationsRead = markAllNotificationsAsRead;
 
     if (searchInput && suggestionsDropdown && suggestionContent) {
         // Show suggestions on input

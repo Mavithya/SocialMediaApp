@@ -45,7 +45,9 @@ public class LikeServiceImpl implements LikeService {
             postRepository.save(post);
             
             // Send notification to post owner (if not liking own post)
-            notificationService.notifyPostLiked(post.getUser(), user, post.getId());
+            if (!post.getUser().getId().equals(user.getId())) {
+                notificationService.notifyPostLiked(post.getUser(), user, post.getId());
+            }
             
             return true;
         }
