@@ -1,12 +1,10 @@
 package com.example.social_media_app.service.impl;
 
 import com.example.social_media_app.model.Comment;
-import com.example.social_media_app.model.Notification;
 import com.example.social_media_app.model.Post;
 import com.example.social_media_app.repository.CommentRepository;
 import com.example.social_media_app.repository.PostRepository;
 import com.example.social_media_app.service.CommentService;
-import com.example.social_media_app.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +18,6 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
-    private final NotificationService notificationService;
 
     // Implementing missing methods from CommentService
 
@@ -41,19 +38,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setUser(user);
         comment.setCreatedAt(LocalDateTime.now());
         comment.setUpdatedAt(LocalDateTime.now());
-        
-        Comment savedComment = save(comment);
-        
-        // Create notification for comment
-        notificationService.createNotification(
-            post.getUser(),
-            user,
-            Notification.NotificationType.COMMENT,
-            user.getFirstName() + " " + user.getLastName() + " commented on your post",
-            post.getId()
-        );
-        
-        return savedComment;
+        return save(comment);
     }
 
     @Override

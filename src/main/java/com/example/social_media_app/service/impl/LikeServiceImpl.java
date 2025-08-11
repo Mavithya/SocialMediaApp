@@ -1,13 +1,11 @@
 package com.example.social_media_app.service.impl;
 
 import com.example.social_media_app.model.Like;
-import com.example.social_media_app.model.Notification;
 import com.example.social_media_app.model.Post;
 import com.example.social_media_app.model.User;
 import com.example.social_media_app.repository.LikeRepository;
 import com.example.social_media_app.repository.PostRepository;
 import com.example.social_media_app.service.LikeService;
-import com.example.social_media_app.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +18,6 @@ public class LikeServiceImpl implements LikeService {
 
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
-    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -44,15 +41,6 @@ public class LikeServiceImpl implements LikeService {
             // Update like count in post
             post.setLikeCount(post.getLikeCount() + 1);
             postRepository.save(post);
-            
-            // Create notification when someone likes a post
-            notificationService.createNotification(
-                post.getUser(), 
-                user, 
-                Notification.NotificationType.LIKE,
-                user.getFirstName() + " " + user.getLastName() + " liked your post",
-                post.getId()
-            );
             
             return true;
         }
