@@ -599,8 +599,7 @@ function createCommentElement(comment) {
 
     // Determine if current user can delete this comment
     const isCommentOwner = comment.user && comment.user.email === currentUserEmail;
-    const isPostOwner = comment.post && comment.post.user && comment.post.user.email === currentUserEmail;
-    const canDelete = isCommentOwner || isPostOwner;
+    const canDelete = isCommentOwner; // Only comment owner can delete their own comments
 
     const deleteButtonHTML = canDelete ? `
       <button onclick="deleteComment(${comment.id}, ${comment.post.id})"
