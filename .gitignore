@@ -30,7 +30,6 @@ build/
 !**/src/test/**/build/
 
 ### VS Code ###
-.vscode/
 
 # Node.js dependencies
 /node_modules/
@@ -43,3 +42,4 @@ build/
 
 # Ignore your custom CSS
 /src/main/resources/static/css/main.css
+config.bat
