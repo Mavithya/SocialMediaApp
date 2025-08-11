@@ -2,11 +2,13 @@ package com.example.social_media_app.service.impl;
 
 import com.example.social_media_app.model.FriendRequest;
 import com.example.social_media_app.model.Friendship;
+import com.example.social_media_app.model.Notification;
 import com.example.social_media_app.model.User;
 import com.example.social_media_app.repository.FriendRequestRepository;
 import com.example.social_media_app.repository.FriendshipRepository;
 import com.example.social_media_app.repository.UserRepository;
 import com.example.social_media_app.service.FriendRequestService;
+import com.example.social_media_app.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +23,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     private final FriendRequestRepository friendRequestRepository;
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
     
     @Override
     public FriendRequest sendFriendRequest(Long senderId, Long receiverId) {
@@ -52,7 +55,18 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 .status(FriendRequest.FriendRequestStatus.PENDING)
                 .build();
         
-        return friendRequestRepository.save(friendRequest);
+        FriendRequest savedRequest = friendRequestRepository.save(friendRequest);
+        
+        // Create notification for friend request
+        notificationService.createNotification(
+            receiver,
+            sender,
+            Notification.NotificationType.FRIEND_REQUEST,
+            sender.getFirstName() + " " + sender.getLastName() + " sent you a friend request",
+            savedRequest.getId()
+        );
+        
+        return savedRequest;
     }
     
     @Override
@@ -81,6 +95,15 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 .build();
         
         friendshipRepository.save(friendship);
+        
+        // Create notification for accepted friend request
+        notificationService.createNotification(
+            request.getSender(),
+            request.getReceiver(),
+            Notification.NotificationType.FRIEND_ACCEPTED,
+            request.getReceiver().getFirstName() + " " + request.getReceiver().getLastName() + " accepted your friend request",
+            request.getId()
+        );
     }
     
     @Override
