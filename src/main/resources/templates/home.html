@@ -238,6 +238,22 @@
       }
     });
     
+    // Profile picture click handler
+    const profilePicture = document.getElementById('profile-picture-img');
+    const profileLink = document.getElementById('profile-link');
+    
+    if (profilePicture && profileLink) {
+      profilePicture.addEventListener('click', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const imageSrc = this.getAttribute('data-image-src');
+        if (imageSrc) {
+          openImageModal(imageSrc);
+        }
+      });
+    }
+    
     document.getElementById('closeCommentModal').addEventListener('click', closeCommentModal);
     
     document.getElementById('commentForm').addEventListener('submit', submitComment);
@@ -1372,6 +1388,11 @@ function getCurrentUserEmail() {
     const modal = document.getElementById('imageModal');
     const modalImage = document.getElementById('modalImage');
     
+    if (!modal || !modalImage) {
+      console.error('Image modal elements not found');
+      return;
+    }
+    
     modalImage.src = imageSrc;
     modal.classList.remove('hidden');
     document.body.classList.add('overflow-hidden');
@@ -1380,6 +1401,10 @@ function getCurrentUserEmail() {
   // Function to close image modal
   function closeImageModal() {
     const modal = document.getElementById('imageModal');
+    if (!modal) {
+      console.error('Image modal not found');
+      return;
+    }
     modal.classList.add('hidden');
     document.body.classList.remove('overflow-hidden');
   }
@@ -1562,6 +1587,20 @@ function getCurrentUserEmail() {
       </div>
     </div>
   </div>
+</div>
+
+<!-- Image Modal for full-size viewing (Profile Pictures) -->
+<div id="imageModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-90 backdrop-blur-sm">
+    <div class="flex items-center justify-center w-full h-full p-4">
+        <div class="relative max-w-4xl max-h-full">
+            <button id="closeImageModal" class="absolute top-2 right-2 z-10 p-2 text-white bg-black bg-opacity-50 rounded-full hover:bg-opacity-70">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <img id="modalImage" src="" alt="Full size view" class="max-w-full max-h-full rounded-lg">
+        </div>
+    </div>
 </div>
 
 </body>
