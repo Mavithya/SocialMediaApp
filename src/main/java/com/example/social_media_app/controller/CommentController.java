@@ -4,18 +4,15 @@ import com.example.social_media_app.model.Comment;
 import com.example.social_media_app.model.Post;
 import com.example.social_media_app.model.User;
 import com.example.social_media_app.service.CommentService;
+import com.example.social_media_app.service.NotificationService;
 import com.example.social_media_app.service.PostService;
 import com.example.social_media_app.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,13 +24,12 @@ public class CommentController {
     private final CommentService commentService;
     private final UserService userService;
     private final PostService postService;
+    private final NotificationService notificationService;
 
     @GetMapping("/{postId}")
     public ResponseEntity<List<Comment>> getCommentsForPost(@PathVariable Long postId) {
         try {
             List<Comment> comments = commentService.getCommentsByPostId(postId);
-            Post post = postService.findById(postId);
-            List<Comment> comments1 = commentService.findByPost(post);
           return ResponseEntity.ok(comments);
         } catch (Exception e) {
             e.printStackTrace();
@@ -72,6 +68,17 @@ public class CommentController {
                     .build();
             
             Comment savedComment = commentService.save(comment);
+            
+            // Create notification for post owner (only if commenter is not the post owner)
+            if (!post.getUser().getId().equals(user.getId())) {
+                notificationService.notifyPostCommented(
+                    post.getUser(), // recipient (post owner)
+                    user,          // commenter
+                    post.getId(),  // post ID
+                    savedComment.getId() // comment ID
+                );
+            }
+            
             return ResponseEntity.ok(savedComment);
         } catch (Exception e) {
             e.printStackTrace();

@@ -445,28 +445,40 @@ function getNotificationIcon(type) {
     const iconClasses = "w-8 h-8 p-1.5 rounded-full text-white";
     
     switch (type) {
-        case 'LIKE':
+        case 'POST_LIKED':
             return `<div class="${iconClasses} bg-red-500">
                         <svg fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
                         </svg>
                     </div>`;
-        case 'COMMENT':
+        case 'POST_COMMENTED':
             return `<div class="${iconClasses} bg-blue-500">
                         <svg fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"/>
                         </svg>
                     </div>`;
-        case 'FRIEND_REQUEST':
+        case 'FRIEND_REQUEST_RECEIVED':
             return `<div class="${iconClasses} bg-green-500">
                         <svg fill="currentColor" viewBox="0 0 20 20">
                             <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
                         </svg>
                     </div>`;
-        case 'FRIEND_ACCEPTED':
+        case 'FRIEND_REQUEST_ACCEPTED':
             return `<div class="${iconClasses} bg-purple-500">
                         <svg fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>`;
+        case 'FRIEND_REQUEST_DECLINED':
+            return `<div class="${iconClasses} bg-orange-500">
+                        <svg fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>`;
+        case 'FRIEND_POST_CREATED':
+            return `<div class="${iconClasses} bg-indigo-500">
+                        <svg fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
                         </svg>
                     </div>`;
         default:
