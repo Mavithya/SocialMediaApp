@@ -247,6 +247,13 @@
         closeCommentModal();
       }
     });
+
+    // Add event listeners for delete modals
+    document.getElementById('deletePostModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeDeletePostModal();
+      }
+    });
   }
 
   // Function to fetch and update like status
@@ -513,6 +520,16 @@
     
     // Fetch comments IMMEDIATELY when modal opens
     fetchComments(postId);
+    
+    // Add event listener for delete comment modal (nested inside comment modal)
+    const deleteCommentModal = document.getElementById('deleteCommentModal');
+    if (deleteCommentModal) {
+      deleteCommentModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeDeleteCommentModal();
+        }
+      });
+    }
   }
 
   // Function to close comment modal
@@ -528,6 +545,9 @@
       modalPostMedia.innerHTML = '';
       modalPostMedia.classList.add('hidden');
     }
+    
+    // Close delete comment modal if it's open
+    closeDeleteCommentModal();
   }
 
   // Function to fetch comments
@@ -634,13 +654,28 @@ function getCurrentUserEmail() {
     return '';
 }
 
+  // Variables to store the post/comment to be deleted
+  let postToDelete = null;
+  let commentToDelete = null;
+  let postIdForComment = null;
+
   // Function to delete a post
   function deletePost(postId) {
-    if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
-      return;
-    }
+    postToDelete = postId;
+    document.getElementById('deletePostModal').classList.remove('hidden');
+  }
 
-    fetch(`/api/posts/${postId}`, {
+  // Function to close delete post modal
+  function closeDeletePostModal() {
+    document.getElementById('deletePostModal').classList.add('hidden');
+    postToDelete = null;
+  }
+
+  // Function to confirm post deletion
+  function confirmDeletePost() {
+    if (!postToDelete) return;
+
+    fetch(`/api/posts/${postToDelete}`, {
       method: 'DELETE',
       headers: {
         [csrfHeader]: csrfToken
@@ -649,7 +684,7 @@ function getCurrentUserEmail() {
       .then(response => {
         if (response.ok) {
           // Remove the post from the DOM
-          const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+          const postCard = document.querySelector(`.post-card[data-post-id="${postToDelete}"]`);
           if (postCard) {
             postCard.remove();
           }
@@ -663,16 +698,31 @@ function getCurrentUserEmail() {
       .catch(error => {
         console.error('Error deleting post:', error);
         showNotification('Error deleting post. Please try again.', 'error');
+      })
+      .finally(() => {
+        closeDeletePostModal();
       });
   }
 
   // Function to delete a comment
   function deleteComment(commentId, postId) {
-    if (!confirm('Are you sure you want to delete this comment?')) {
-      return;
-    }
+    commentToDelete = commentId;
+    postIdForComment = postId;
+    document.getElementById('deleteCommentModal').classList.remove('hidden');
+  }
 
-    fetch(`/api/comments/${commentId}`, {
+  // Function to close delete comment modal
+  function closeDeleteCommentModal() {
+    document.getElementById('deleteCommentModal').classList.add('hidden');
+    commentToDelete = null;
+    postIdForComment = null;
+  }
+
+  // Function to confirm comment deletion
+  function confirmDeleteComment() {
+    if (!commentToDelete || !postIdForComment) return;
+
+    fetch(`/api/comments/${commentToDelete}`, {
       method: 'DELETE',
       headers: {
         [csrfHeader]: csrfToken
@@ -681,7 +731,7 @@ function getCurrentUserEmail() {
       .then(response => {
         if (response.ok) {
           // Refresh comments list
-          fetchComments(postId);
+          fetchComments(postIdForComment);
           showNotification('Comment deleted successfully!', 'success');
         } else {
           response.text().then(text => {
@@ -692,6 +742,9 @@ function getCurrentUserEmail() {
       .catch(error => {
         console.error('Error deleting comment:', error);
         showNotification('Error deleting comment. Please try again.', 'error');
+      })
+      .finally(() => {
+        closeDeleteCommentModal();
       });
   }
 
