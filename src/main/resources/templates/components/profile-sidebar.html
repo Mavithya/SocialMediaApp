@@ -14,8 +14,9 @@
                             <img th:if="${#authentication.principal.profilePicture != null and #authentication.principal.profilePicture != ''}" 
                                  th:src="${#authentication.principal.profilePicture}" 
                                  alt="Profile" 
-                                 class="object-cover w-full h-full rounded-full"
-                                 id="profile-picture-img"/>
+                                 class="object-cover w-full h-full rounded-full cursor-pointer"
+                                 id="profile-picture-img"
+                                 th:onclick="'openImageModal(\'' + ${#authentication.principal.profilePicture} + '\'); event.preventDefault(); event.stopPropagation();'"/>
                             <svg th:unless="${#authentication.principal.profilePicture != null and #authentication.principal.profilePicture != ''}" 
                                  class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20"
                                  id="profile-default-icon">
