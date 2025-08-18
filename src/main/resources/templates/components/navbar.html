@@ -45,7 +45,7 @@
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
                     </svg>
-                    <span id="notificationBadge" class="badge badge-sm badge-primary absolute -top-1 -right-1 !bg-red-500 border-none hidden">0</span>
+                    <span id="notification-badge" class="badge badge-sm badge-primary absolute -top-1 -right-1 !bg-red-500 border-none hidden">0</span>
                 </div>
                 
                 <!-- Notification Dropdown -->
@@ -60,15 +60,15 @@
                         </div>
                         
                         <!-- Notifications List -->
-                        <div id="notificationsList" class="max-h-96 overflow-y-auto">
+                        <div id="notifications-list" class="max-h-96 overflow-y-auto">
                             <!-- Loading state -->
-                            <div id="notificationsLoading" class="flex items-center justify-center py-8">
-                                <div class="loading loading-spinner loading-sm text-brand-500"></div>
+                            <div id="notifications-loading" class="flex items-center justify-center py-8">
+                                <div class="loading loading-spinner loading-sm  w-[20px] h-[20px] text-black z-30" ></div>
                                 <span class="ml-2 text-gray-500">Loading notifications...</span>
                             </div>
                             
                             <!-- Empty state -->
-                            <div id="notificationsEmpty" class="hidden text-center py-8 px-4">
+                            <div id="notifications-empty" class="hidden text-center py-8 px-4">
                                 <svg class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5V7a1 1 0 011-1h8a1 1 0 011 1v10z"></path>
                                 </svg>
@@ -77,14 +77,15 @@
                             </div>
                             
                             <!-- Notifications container -->
-                            <div id="notificationsContainer" class="divide-y divide-gray-100">
+                            <div id="notifications-container" class="divide-y divide-gray-100">
                                 <!-- Dynamic notifications will be inserted here -->
                             </div>
                         </div>
                         
                         <!-- Footer -->
                         <div class="p-4 bg-gray-50 border-t border-gray-200">
-                            <button class="w-full btn btn-sm bg-brand-500 text-white hover:bg-brand-600 border-none">
+                            <button class="w-full btn btn-sm !bg-brand-500 text-white hover:bg-brand-600 border-none dark:!bg-brand-600 dark:!hover:bg-brand-700 transition-transform hover:scale-105 duration-200"
+                                    onclick="window.location.href='/notifications'">
                                 View All Notifications
                             </button>
                         </div>
@@ -345,17 +346,23 @@ function initializeNotificationSystem() {
 }
 
 async function loadNotifications() {
-    const loadingElement = document.getElementById('notificationsLoading');
-    const containerElement = document.getElementById('notificationsContainer');
-    const emptyElement = document.getElementById('notificationsEmpty');
-    
-    if (!containerElement) return;
-    
+    const loadingElement = document.getElementById('notifications-loading');
+    const containerElement = document.getElementById('notifications-container');
+    const emptyElement = document.getElementById('notifications-empty');
+
+    if (!containerElement) {
+        console.error('Notification container not found');
+        return;
+    }
+
     console.log('Loading notifications...');
     
     try {
         // Show loading state
-        if (loadingElement) loadingElement.classList.remove('hidden');
+        if (loadingElement) {
+            loadingElement.classList.remove('hidden');
+            console.log('✅ Loading spinner shown');
+        }
         if (emptyElement) emptyElement.classList.add('hidden');
         containerElement.innerHTML = '';
         
@@ -389,8 +396,11 @@ async function loadNotifications() {
         console.log('Notifications loaded:', data);
         
         // Hide loading state
-        if (loadingElement) loadingElement.classList.add('hidden');
-        
+        if (loadingElement) {
+            loadingElement.classList.add('hidden');
+            console.log('✅ Loading spinner hidden');
+        }
+
         if (data.content && data.content.length > 0) {
             renderNotifications(data.content);
         } else {
@@ -409,7 +419,7 @@ async function loadNotifications() {
 }
 
 function renderNotifications(notifications) {
-    const containerElement = document.getElementById('notificationsContainer');
+    const containerElement = document.getElementById('notifications-container');
     if (!containerElement) return;
     
     console.log('Rendering notifications:', notifications);
