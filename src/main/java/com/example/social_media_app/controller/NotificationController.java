@@ -25,7 +25,7 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final UserService userService;
 
-    // Get unread notifications count
+    // Get unread notifications count with proper response format
     @GetMapping("/count")
     public ResponseEntity<Map<String, Object>> getUnreadCount(Authentication authentication) {
         try {
@@ -38,8 +38,8 @@ public class NotificationController {
             
             long count = notificationService.getUnreadCount(user);
             Map<String, Object> response = new HashMap<>();
-            response.put("count", count);
-            
+            response.put("unreadCount", count);
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -88,7 +88,7 @@ public class NotificationController {
     }
 
     // Mark notification as read
-    @PutMapping("/{notificationId}/read")
+    @PostMapping("/{notificationId}/read")
     public ResponseEntity<Map<String, Object>> markAsRead(
             @PathVariable Long notificationId,
             Authentication authentication) {
@@ -114,7 +114,7 @@ public class NotificationController {
     }
 
     // Mark all notifications as read
-    @PutMapping("/read-all")
+    @PostMapping("/read-all")
     public ResponseEntity<Map<String, Object>> markAllAsRead(Authentication authentication) {
         try {
             String email = authentication.getName();

@@ -12,6 +12,14 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
 
+  <!-- WebSocket libraries for real-time notifications -->
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+  <!-- Custom notification WebSocket client -->
+  <script th:src="@{/css/notification-websocket.js}" defer></script>
+  <!-- Custom notification handler for dropdown -->
+  <script th:src="@{/css/notification-handler.js}" defer></script>
+
   <!-- Custom styles for scrollable posts -->
   <style>
     .post-content-scroll {
@@ -48,7 +56,7 @@
   
 </head>
 
-<body class="text-white bg-brand-50">
+<body class="text-white bg-brand-50" data-user-authenticated="true" sec:authorize="isAuthenticated()">
 
 <!-- Hidden input to store current user email for JavaScript -->
 <input type="hidden" id="currentUserEmail" th:value="${#authentication.name}" sec:authorize="isAuthenticated()">
