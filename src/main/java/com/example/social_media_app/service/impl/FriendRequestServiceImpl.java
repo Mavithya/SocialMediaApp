@@ -182,4 +182,18 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     public boolean hasPendingRequest(Long senderId, Long receiverId) {
         return friendRequestRepository.findPendingRequestBetweenUsers(senderId, receiverId).isPresent();
     }
+    
+    @Override
+    public void unfriend(Long userId1, Long userId2) {
+        // Check if friendship exists
+        if (!friendshipRepository.existsBetweenUsers(userId1, userId2)) {
+            throw new IllegalArgumentException("Friendship does not exist between these users");
+        }
+        
+        // Find and delete the friendship
+        Friendship friendship = friendshipRepository.findBetweenUsers(userId1, userId2);
+        if (friendship != null) {
+            friendshipRepository.delete(friendship);
+        }
+    }
 }
