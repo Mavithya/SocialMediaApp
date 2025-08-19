@@ -7,10 +7,8 @@ import com.example.social_media_app.repository.LikeRepository;
 import com.example.social_media_app.repository.CommentRepository;
 import com.example.social_media_app.repository.PostRepository;
 import com.example.social_media_app.repository.PostMediaRepository;
-import com.example.social_media_app.repository.FriendshipRepository;
 import com.example.social_media_app.service.PostService;
 import com.example.social_media_app.service.FileUploadService;
-import com.example.social_media_app.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,8 +28,6 @@ public class PostServiceImpl implements PostService {
     private final CommentRepository commentRepository;
     private final PostMediaRepository postMediaRepository;
     private final FileUploadService fileUploadService;
-    private final FriendshipRepository friendshipRepository;
-    private final NotificationService notificationService;
 
     @Override
     public List<Post> findAll() {
@@ -100,15 +96,7 @@ public class PostServiceImpl implements PostService {
         post.setLikeCount(0);
         post.setCommentCount(0);
         
-        Post savedPost = postRepository.save(post);
-        
-        // Notify friends about the new post
-        List<User> friends = friendshipRepository.findAllFriendsByUserId(user.getId());
-        if (!friends.isEmpty()) {
-            notificationService.notifyFriendPostCreated(friends, user, savedPost.getId());
-        }
-        
-        return savedPost;
+        return postRepository.save(post);
     }
 
     @Override
@@ -154,12 +142,6 @@ public class PostServiceImpl implements PostService {
                 // You might want to handle this differently - maybe fail the entire post creation
                 // For now, we'll continue without media
             }
-        }
-        
-        // Notify friends about the new post
-        List<User> friends = friendshipRepository.findAllFriendsByUserId(user.getId());
-        if (!friends.isEmpty()) {
-            notificationService.notifyFriendPostCreated(friends, user, post.getId());
         }
         
         return post;

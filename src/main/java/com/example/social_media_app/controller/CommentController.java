@@ -4,7 +4,6 @@ import com.example.social_media_app.model.Comment;
 import com.example.social_media_app.model.Post;
 import com.example.social_media_app.model.User;
 import com.example.social_media_app.service.CommentService;
-import com.example.social_media_app.service.NotificationService;
 import com.example.social_media_app.service.PostService;
 import com.example.social_media_app.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ public class CommentController {
     private final CommentService commentService;
     private final UserService userService;
     private final PostService postService;
-    private final NotificationService notificationService;
 
     @GetMapping("/{postId}")
     public ResponseEntity<List<Comment>> getCommentsForPost(@PathVariable Long postId) {
@@ -68,16 +66,6 @@ public class CommentController {
                     .build();
             
             Comment savedComment = commentService.save(comment);
-            
-            // Create notification for post owner (only if commenter is not the post owner)
-            if (!post.getUser().getId().equals(user.getId())) {
-                notificationService.notifyPostCommented(
-                    post.getUser(), // recipient (post owner)
-                    user,          // commenter
-                    post.getId(),  // post ID
-                    savedComment.getId() // comment ID
-                );
-            }
             
             return ResponseEntity.ok(savedComment);
         } catch (Exception e) {

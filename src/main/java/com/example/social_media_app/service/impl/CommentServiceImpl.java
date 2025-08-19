@@ -5,7 +5,6 @@ import com.example.social_media_app.model.Post;
 import com.example.social_media_app.repository.CommentRepository;
 import com.example.social_media_app.repository.PostRepository;
 import com.example.social_media_app.service.CommentService;
-import com.example.social_media_app.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +18,6 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
-    private final NotificationService notificationService;
 
     // Implementing missing methods from CommentService
 
@@ -81,12 +79,6 @@ public class CommentServiceImpl implements CommentService {
         int commentCount = commentRepository.countByPost(post);
         post.setCommentCount(commentCount);
         postRepository.save(post);
-        
-        // Send notification to post owner (if not commenting on own post)
-        if (comment.getId() == null && !post.getUser().getId().equals(comment.getUser().getId())) { // Only for new comments and not self-comments
-            notificationService.notifyPostCommented(post.getUser(), comment.getUser(), 
-                                                   post.getId(), savedComment.getId());
-        }
         
         return savedComment;
     }
