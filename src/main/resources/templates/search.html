@@ -239,9 +239,9 @@ document.addEventListener('click', function(e) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                e.target.textContent = 'Sent';
+                e.target.textContent = 'Request Sent';
                 e.target.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-                e.target.classList.add('bg-green-500', 'text-white');
+                e.target.classList.add('bg-gray-400', 'cursor-not-allowed');
                 e.target.disabled = true;
             } else {
                 console.error('Error sending friend request:', data.message);

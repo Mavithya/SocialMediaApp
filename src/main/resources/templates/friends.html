@@ -1022,9 +1022,9 @@
 
             if (response.ok) {
                 // Update the button text and style
-                button.textContent = 'Request sent';
+                button.textContent = 'Request Sent';
                 button.classList.remove('bg-brand-600', 'hover:bg-brand-700');
-                button.classList.add('bg-green-500', 'text-white');
+                button.classList.add('bg-gray-400', 'cursor-not-allowed');
                 button.disabled = true;
                 
                 // Show success message
@@ -1310,9 +1310,9 @@
 
         // Handle Add Friend buttons that don't have onclick handlers
         if (e.target.textContent === 'Add Friend' && !e.target.hasAttribute('onclick')) {
-            e.target.textContent = 'Request sent';
+            e.target.textContent = 'Request Sent';
             e.target.classList.remove('bg-brand-600', 'hover:bg-brand-700');
-            e.target.classList.add('bg-green-500', 'text-white');
+            e.target.classList.add('bg-gray-400', 'cursor-not-allowed');
             e.target.disabled = true;
         }
     });
