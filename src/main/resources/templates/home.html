@@ -54,7 +54,7 @@
 <input type="hidden" id="currentUserEmail" th:value="${#authentication.name}" sec:authorize="isAuthenticated()">
 
 <!-- Flash Messages -->
-<div th:if="${error}" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg max-w-md">
+<div th:if="${error}" class="fixed z-50 max-w-md px-6 py-3 text-white transform -translate-x-1/2 bg-red-500 rounded-lg shadow-lg top-4 left-1/2">
   <div class="flex items-center">
     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -63,7 +63,7 @@
   </div>
 </div>
 
-<div th:if="${success}" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg max-w-md">
+<div th:if="${success}" class="fixed z-50 max-w-md px-6 py-3 text-white transform -translate-x-1/2 bg-green-500 rounded-lg shadow-lg top-4 left-1/2">
   <div class="flex items-center">
     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -74,14 +74,14 @@
 
 <div th:replace="~{components/navbar :: navbar}"></div>
 
-<div class="flex flex-col justify-between lg:flex-row min-h-screen mt-6 gap-4">
+<div class="flex flex-col justify-between min-h-screen gap-4 mt-6 lg:flex-row">
 
   <aside class="hidden lg:block ml-6 sticky top-20 self-start h-[calc(100vh-5rem)] overflow-y-auto">
     <div th:replace="~{components/profile-sidebar :: profileSidebar}"></div>
   </aside>
 
   <!-- Main Feed -->
-  <main class="flex-1 max-w-3xl mx-auto px-4">
+  <main class="flex-1 max-w-3xl px-4 mx-auto">
     <div th:replace="~{components/feed :: feed}"></div>
   </main>
 
@@ -413,14 +413,14 @@
             const img = postImages[0];
             modalPostMedia.innerHTML = `
               <img src="${img.src}" alt="${img.alt || 'Post image'}" 
-                   class="w-full max-h-64 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                   class="object-cover w-full border border-gray-200 rounded-lg cursor-pointer max-h-64"
                    onclick="openImageModal('${img.src}')"/>
             `;
           } else if (postVideos.length > 0) {
             const video = postVideos[0];
             const source = video.querySelector('source');
             modalPostMedia.innerHTML = `
-              <video controls class="w-full max-h-64 rounded-lg border border-gray-200">
+              <video controls class="w-full border border-gray-200 rounded-lg max-h-64">
                 <source src="${source.src}" type="${source.type}"/>
                 Your browser does not support the video tag.
               </video>
@@ -436,7 +436,7 @@
             mediaHtml += `
               <div class="relative">
                 <img src="${img.src}" alt="${img.alt || 'Post image'}" 
-                     class="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                     class="object-cover w-full h-32 border border-gray-200 rounded-lg cursor-pointer"
                      onclick="openImageModal('${img.src}')"/>
               </div>
             `;
@@ -447,7 +447,7 @@
             const source = video.querySelector('source');
             mediaHtml += `
               <div class="relative">
-                <video controls class="w-full h-32 rounded-lg border border-gray-200">
+                <video controls class="w-full h-32 border border-gray-200 rounded-lg">
                   <source src="${source.src}" type="${source.type}"/>
                   Your browser does not support the video tag.
                 </video>
@@ -468,7 +468,7 @@
             mediaHtml += `
               <div class="relative">
                 <img src="${img.src}" alt="${img.alt || 'Post image'}" 
-                     class="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                     class="object-cover w-full h-32 border border-gray-200 rounded-lg cursor-pointer"
                      onclick="openImageModal('${img.src}')"/>
               </div>
             `;
@@ -481,7 +481,7 @@
             const source = video.querySelector('source');
             mediaHtml += `
               <div class="relative">
-                <video controls class="w-full h-32 rounded-lg border border-gray-200">
+                <video controls class="w-full h-32 border border-gray-200 rounded-lg">
                   <source src="${source.src}" type="${source.type}"/>
                   Your browser does not support the video tag.
                 </video>
@@ -497,9 +497,9 @@
               mediaHtml += `
                 <div class="relative">
                   <img src="${img.src}" alt="${img.alt || 'Post image'}" 
-                       class="w-full h-32 object-cover rounded-lg border border-gray-200"/>
-                  <div class="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
-                    <span class="text-white text-lg font-bold">+${totalMedia - 2} more</span>
+                       class="object-cover w-full h-32 border border-gray-200 rounded-lg"/>
+                  <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                    <span class="text-lg font-bold text-white">+${totalMedia - 2} more</span>
                   </div>
                 </div>
               `;
@@ -508,11 +508,11 @@
               const source = video.querySelector('source');
               mediaHtml += `
                 <div class="relative">
-                  <video class="w-full h-32 rounded-lg border border-gray-200">
+                  <video class="w-full h-32 border border-gray-200 rounded-lg">
                     <source src="${source.src}" type="${source.type}"/>
                   </video>
-                  <div class="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
-                    <span class="text-white text-lg font-bold">+${totalMedia - 2} more</span>
+                  <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                    <span class="text-lg font-bold text-white">+${totalMedia - 2} more</span>
                   </div>
                 </div>
               `;
@@ -522,8 +522,8 @@
             const existingSecond = modalPostMedia.lastElementChild;
             if (existingSecond) {
               existingSecond.innerHTML += `
-                <div class="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
-                  <span class="text-white text-lg font-bold">+${totalMedia - 2} more</span>
+                <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                  <span class="text-lg font-bold text-white">+${totalMedia - 2} more</span>
                 </div>
               `;
             }
@@ -632,13 +632,13 @@ function createCommentElement(comment) {
     const profilePicture = comment.user && comment.user.profilePicture && comment.user.profilePicture.trim() !== '';
     const avatarHTML = profilePicture ? 
       `<img src="${comment.user.profilePicture}" alt="Profile" class="object-cover w-full h-full rounded-full"/>` :
-      `<svg class="mt-2 ml-2 w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+      `<svg class="w-4 h-4 mt-2 ml-2 text-white" fill="currentColor" viewBox="0 0 20 20">
          <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
        </svg>`;
 
     div.innerHTML = `
       <div class="avatar">
-        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-brand-300">
+        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-brand-300">
           ${avatarHTML}
         </div>
       </div>
@@ -651,7 +651,7 @@ function createCommentElement(comment) {
           ${deleteButtonHTML}
         </div>
 
-        <p class="text-sm text-gray-700 mt-1">${comment.content}</p>
+        <p class="mt-1 text-sm text-gray-700">${comment.content}</p>
 
       </div>
     `;
@@ -1158,23 +1158,544 @@ function getCurrentUserEmail() {
     });
   });
 
-  // Notification system for home page
+  // Location Modal Functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const locationButton = document.getElementById('locationButton');
+    const locationModal = document.getElementById('locationModal');
+    const closeLocationModal = document.getElementById('closeLocationModal');
+    const cancelLocationBtn = document.getElementById('cancelLocationBtn');
+    const locationSearch = document.getElementById('locationSearch');
+    const locationResults = document.getElementById('locationResults');
+    const getCurrentLocationBtn = document.getElementById('getCurrentLocation');
+    const selectedLocationContainer = document.getElementById('selectedLocationContainer');
+    const selectedLocationText = document.getElementById('selectedLocationText');
+    const removeSelectedLocation = document.getElementById('removeSelectedLocation');
+    const addLocationBtn = document.getElementById('addLocationBtn');
+    const postLocation = document.getElementById('postLocation');
+    
+    let selectedLocation = null;
+    let searchTimeout;
+    
+    // Sample locations for demo (replace with real API call in production)
+    const popularLocations = [
+      // Sri Lankan locations
+      { name: "Ambalangoda, Sri Lanka", lat: 6.2359, lng: 80.0543, type: "city" },
+      { name: "Colombo, Sri Lanka", lat: 6.9271, lng: 79.8612, type: "city" },
+      { name: "Galle, Sri Lanka", lat: 6.0329, lng: 80.2168, type: "city" },
+      { name: "Kandy, Sri Lanka", lat: 7.2906, lng: 80.6337, type: "city" },
+      { name: "Negombo, Sri Lanka", lat: 7.2083, lng: 79.8358, type: "city" },
+      { name: "Matara, Sri Lanka", lat: 5.9485, lng: 80.5353, type: "city" },
+      { name: "Jaffna, Sri Lanka", lat: 9.6615, lng: 80.0255, type: "city" },
+      { name: "Batticaloa, Sri Lanka", lat: 7.7102, lng: 81.6924, type: "city" },
+      // International locations
+      { name: "New York, NY, USA", lat: 40.7128, lng: -74.0060, type: "city" },
+      { name: "Los Angeles, CA, USA", lat: 34.0522, lng: -118.2437, type: "city" },
+      { name: "London, UK", lat: 51.5074, lng: -0.1278, type: "city" },
+      { name: "Paris, France", lat: 48.8566, lng: 2.3522, type: "city" },
+      { name: "Tokyo, Japan", lat: 35.6762, lng: 139.6503, type: "city" },
+      { name: "Sydney, Australia", lat: -33.8688, lng: 151.2093, type: "city" },
+      { name: "Mumbai, India", lat: 19.0760, lng: 72.8777, type: "city" },
+      { name: "Dubai, UAE", lat: 25.2048, lng: 55.2708, type: "city" }
+    ];
+    
+    // Open location modal
+    if (locationButton) {
+      locationButton.addEventListener('click', function() {
+        openLocationModal();
+        showPopularLocations();
+      });
+    }
+    
+    // Close modal functions
+    function closeLocationModalFunc() {
+      if (locationModal) {
+        locationModal.classList.add('hidden');
+        locationModal.classList.remove('flex');
+        document.body.classList.remove('overflow-hidden');
+        // Reset modal state
+        if (locationResults) locationResults.innerHTML = '';
+        if (locationSearch) locationSearch.value = '';
+        // Keep selected location visible if one is selected
+        if (!postLocation || !postLocation.value) {
+          if (selectedLocationContainer) {
+            selectedLocationContainer.classList.add('hidden');
+            selectedLocationContainer.classList.remove('flex');
+          }
+        }
+      }
+    }
+    
+    if (closeLocationModal) {
+      closeLocationModal.addEventListener('click', closeLocationModalFunc);
+    }
+    if (cancelLocationBtn) {
+      cancelLocationBtn.addEventListener('click', closeLocationModalFunc);
+    }
+    
+    // Close when clicking outside the modal content
+    if (locationModal) {
+      locationModal.addEventListener('click', function(e) {
+        if (e.target === locationModal) {
+          closeLocationModalFunc();
+        }
+      });
+    }
+    
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && locationModal && !locationModal.classList.contains('hidden')) {
+        closeLocationModalFunc();
+      }
+    });
+    
+    // Open modal function
+    function openLocationModal() {
+      if (locationModal) {
+        locationModal.classList.remove('hidden');
+        locationModal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+        
+        // If location is already selected, show it
+        if (postLocation && postLocation.value) {
+          try {
+            const locationData = JSON.parse(postLocation.value);
+            if (selectedLocationText) selectedLocationText.textContent = locationData.name;
+            if (selectedLocationContainer) {
+              selectedLocationContainer.classList.remove('hidden');
+              selectedLocationContainer.classList.add('flex');
+            }
+          } catch (e) {
+            console.error('Error parsing location data:', e);
+            if (selectedLocationContainer) {
+              selectedLocationContainer.classList.add('hidden');
+              selectedLocationContainer.classList.remove('flex');
+            }
+          }
+        } else {
+          if (selectedLocationContainer) {
+            selectedLocationContainer.classList.add('hidden');
+            selectedLocationContainer.classList.remove('flex');
+          }
+        }
+      }
+    }
+    
+    // Get current location
+    if (getCurrentLocationBtn) {
+      getCurrentLocationBtn.addEventListener('click', function() {
+        // Show loading state
+        const originalContent = getCurrentLocationBtn.innerHTML;
+        getCurrentLocationBtn.innerHTML = `
+          <div class="flex items-center justify-center w-12 h-12 mr-4 transition-colors rounded-full bg-brand-100 text-brand-600">
+            <div class="w-6 h-6 border-2 border-t-2 rounded-full border-brand-600 animate-spin"></div>
+          </div>
+          <div>
+            <p class="font-medium text-gray-800">Getting your location...</p>
+            <p class="text-sm text-gray-600">Please wait</p>
+          </div>
+        `;
+        getCurrentLocationBtn.disabled = true;
+        
+        if (navigator.geolocation) {
+          // Configure geolocation options for better accuracy and user experience
+          const options = {
+            enableHighAccuracy: true,  // Request high accuracy
+            timeout: 10000,            // 10 second timeout
+            maximumAge: 300000         // Accept cached location up to 5 minutes old
+          };
+          
+          navigator.geolocation.getCurrentPosition(
+            function(position) {
+              const lat = position.coords.latitude;
+              const lng = position.coords.longitude;
+              console.log('✅ Location detected:', lat, lng);
+              
+              // Simulate reverse geocoding (replace with real API in production)
+              reverseGeocode(lat, lng);
+            },
+            function(error) {
+              // Reset button
+              getCurrentLocationBtn.innerHTML = originalContent;
+              getCurrentLocationBtn.disabled = false;
+              
+              // Show detailed error notification with helpful instructions
+              let errorMessage = "Unable to get your location. ";
+              let helpText = "";
+              
+              switch(error.code) {
+                case error.PERMISSION_DENIED:
+                  errorMessage = "Location access denied. ";
+                  helpText = "Please click the location icon in your browser's address bar and allow location access, then try again.";
+                  break;
+                case error.POSITION_UNAVAILABLE:
+                  errorMessage = "Location information is unavailable. ";
+                  helpText = "Please check your internet connection and try again. Make sure location services are enabled on your device.";
+                  break;
+                case error.TIMEOUT:
+                  errorMessage = "Location request timed out. ";
+                  helpText = "The request took too long. Please try again or check your connection.";
+                  break;
+                default:
+                  errorMessage = "Location error occurred. ";
+                  helpText = "Please try again or select a location manually.";
+                  break;
+              }
+              
+              // Show both error message and help text
+              showNotification(errorMessage + helpText, 'error');
+              console.error('❌ Geolocation error:', error);
+            },
+            options  // Pass the options object
+          );
+        } else {
+          getCurrentLocationBtn.innerHTML = originalContent;
+          getCurrentLocationBtn.disabled = false;
+          showNotification("Geolocation is not supported by this browser. Please select a location manually or update your browser.", 'error');
+        }
+      });
+    }
+    
+    // Simulated reverse geocoding (replace with actual API call in production)
+    function reverseGeocode(lat, lng) {
+      // Simulate API call delay
+      setTimeout(() => {
+        // Generate a realistic location name based on coordinates (simulate location detection)
+        // In production, replace this with actual geocoding API like Google Maps, Mapbox, or OpenStreetMap
+        let locationName;
+        
+        // Simulate different locations based on coordinates range
+        if (lat >= 6.0 && lat <= 10.0 && lng >= 79.0 && lng <= 82.0) {
+          // Sri Lanka region
+          if (lat >= 6.0 && lat <= 6.5 && lng >= 79.8 && lng <= 80.2) {
+            locationName = "Galle, Sri Lanka";
+          } else if (lat >= 6.8 && lat <= 7.2 && lng >= 79.8 && lng <= 80.4) {
+            locationName = "Colombo, Sri Lanka"; 
+          } else if (lat >= 6.5 && lat <= 7.0 && lng >= 79.9 && lng <= 80.5) {
+            locationName = "Ambalangoda, Sri Lanka";
+          } else {
+            locationName = "Sri Lanka";
+          }
+        } else if (lat >= 40.0 && lat <= 41.0 && lng >= -74.5 && lng <= -73.5) {
+          locationName = "New York, NY, USA"; // New York area
+        } else if (lat >= 51.0 && lat <= 52.0 && lng >= -0.5 && lng <= 0.5) {
+          locationName = "London, United Kingdom"; // London area
+        } else if (lat >= 37.0 && lat <= 38.0 && lng >= -122.5 && lng <= -121.5) {
+          locationName = "San Francisco, CA, USA"; // San Francisco area
+        } else if (lat >= 28.5 && lat <= 29.0 && lng >= 77.0 && lng <= 77.5) {
+          locationName = "New Delhi, India"; // Delhi area
+        } else if (lat >= 19.0 && lat <= 19.3 && lng >= 72.7 && lng <= 73.0) {
+          locationName = "Mumbai, Maharashtra, India"; // Mumbai area
+        } else if (lat >= 12.9 && lat <= 13.1 && lng >= 77.5 && lng <= 77.7) {
+          locationName = "Bangalore, Karnataka, India"; // Bangalore area
+        } else {
+          // Default fallback with a generic location name
+          locationName = "Current Location";
+        }
+        
+        // Set as selected location
+        selectedLocation = {
+          name: locationName,
+          lat: lat,
+          lng: lng,
+          current: true,
+          type: "current"
+        };
+        
+        // Update UI
+        if (selectedLocationText) selectedLocationText.textContent = locationName;
+        if (selectedLocationContainer) {
+          selectedLocationContainer.classList.remove('hidden');
+          selectedLocationContainer.classList.add('flex');
+        }
+        
+        // Reset button
+        if (getCurrentLocationBtn) {
+          getCurrentLocationBtn.innerHTML = `
+            <div class="flex items-center justify-center w-12 h-12 mr-4 transition-colors rounded-full bg-brand-100 text-brand-600 group-hover:bg-brand-200">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div>
+              <p class="font-medium text-gray-800">Use current location</p>
+              <p class="text-sm text-gray-600">Share your precise location</p>
+            </div>
+            <div class="ml-auto">
+              <svg class="w-5 h-5 text-gray-400 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          `;
+          getCurrentLocationBtn.disabled = false;
+        }
+        
+        showNotification('Current location detected!', 'success');
+      }, 1500);
+    }
+    
+    // Location search input
+    if (locationSearch) {
+      locationSearch.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        clearTimeout(searchTimeout);
+        
+        if (query.length < 2) {
+          if (query.length === 0) {
+            showPopularLocations();
+          }
+          return;
+        }
+        
+        // Debounce search to avoid too many requests
+        searchTimeout = setTimeout(() => {
+          searchLocations(query);
+        }, 300);
+      });
+    }
+    
+    // Search locations (simulated - replace with actual API call)
+    function searchLocations(query) {
+      if (!locationResults) return;
+      
+      // Show loading
+      locationResults.innerHTML = `
+        <div class="flex items-center justify-center py-8">
+          <div class="w-6 h-6 border-2 border-t-2 rounded-full border-brand-600 animate-spin"></div>
+          <span class="ml-3 text-gray-600">Searching locations...</span>
+        </div>
+      `;
+      
+      // Simulate API call delay
+      setTimeout(() => {
+        // Filter the sample locations based on query
+        const filteredLocations = popularLocations.filter(loc => 
+          loc.name.toLowerCase().includes(query.toLowerCase())
+        );
+        
+        // Generate results
+        if (filteredLocations.length > 0) {
+          renderLocationResults(filteredLocations, `Results for "${query}"`);
+        } else {
+          locationResults.innerHTML = `
+            <div class="py-8 text-center">
+              <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              <p class="font-medium text-gray-500">No locations found</p>
+              <p class="text-sm text-gray-400">Try searching for a different location</p>
+            </div>
+          `;
+        }
+      }, 500);
+    }
+    
+    // Show popular/suggested locations
+    function showPopularLocations() {
+      // Prioritize Sri Lankan locations
+      const sriLankanLocations = popularLocations.filter(loc => loc.name.includes('Sri Lanka'));
+      const otherLocations = popularLocations.filter(loc => !loc.name.includes('Sri Lanka'));
+      const orderedLocations = [...sriLankanLocations, ...otherLocations.slice(0, 6)]; // Show top 6 international
+      
+      renderLocationResults(orderedLocations, 'Popular Locations');
+    }
+    
+    // Render location results
+    function renderLocationResults(locations, title) {
+      if (!locationResults) return;
+      
+      let resultsHtml = `<p class="mb-4 text-sm font-semibold tracking-wide text-gray-500 uppercase">${title}</p>`;
+      
+      locations.forEach(location => {
+        const locationIcon = location.type === 'city' ? 
+          `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+           </svg>` :
+          `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+           </svg>`;
+           
+        resultsHtml += `
+          <div class="flex items-center p-4 mb-2 transition-all border-2 border-gray-200 cursor-pointer location-item rounded-xl hover:border-brand-300 hover:bg-brand-50 group" 
+               data-location='${JSON.stringify(location)}'>
+            <div class="flex-shrink-0 mr-4 text-gray-500 transition-colors group-hover:text-brand-600">
+              ${locationIcon}
+            </div>
+            <div class="flex-1">
+              <p class="font-medium text-gray-800 group-hover:text-brand-700">${location.name}</p>
+              <p class="text-sm text-gray-500">${location.type === 'city' ? 'City' : 'Location'}</p>
+            </div>
+            <div class="ml-auto transition-opacity opacity-0 group-hover:opacity-100">
+              <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+        `;
+      });
+      
+      locationResults.innerHTML = resultsHtml;
+      
+      // Add click event listeners to location items
+      document.querySelectorAll('.location-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const locationData = JSON.parse(this.getAttribute('data-location'));
+          
+          // Set as selected location
+          selectedLocation = locationData;
+          
+          // Update UI
+          if (selectedLocationText) selectedLocationText.textContent = locationData.name;
+          if (selectedLocationContainer) {
+            selectedLocationContainer.classList.remove('hidden');
+            selectedLocationContainer.classList.add('flex');
+          }
+          
+          // Add nice selection feedback
+          this.style.transform = 'scale(0.98)';
+          setTimeout(() => {
+            this.style.transform = 'scale(1)';
+          }, 150);
+        });
+      });
+    }
+    
+    // Remove selected location
+    if (removeSelectedLocation) {
+      removeSelectedLocation.addEventListener('click', function() {
+        selectedLocation = null;
+        if (selectedLocationContainer) {
+          selectedLocationContainer.classList.add('hidden');
+          selectedLocationContainer.classList.remove('flex');
+        }
+        if (selectedLocationText) selectedLocationText.textContent = '';
+        if (postLocation) postLocation.value = '';
+        
+        // Remove form location indicator if it exists
+        const formLocationIndicator = document.getElementById('formLocationIndicator');
+        if (formLocationIndicator) {
+          formLocationIndicator.remove();
+        }
+      });
+    }
+    
+    // Add location to post
+    if (addLocationBtn) {
+      addLocationBtn.addEventListener('click', function() {
+        if (selectedLocation) {
+          // Save location to hidden input
+          if (postLocation) postLocation.value = JSON.stringify(selectedLocation);
+          
+          // Create location indicator in post form
+          updateLocationIndicator(selectedLocation.name);
+          
+          // Close modal
+          closeLocationModalFunc();
+          
+          // Show success notification
+          showNotification('Location added to your post!', 'success');
+        } else {
+          showNotification('Please select a location first', 'error');
+        }
+      });
+    }
+    
+    // Function to update location indicator
+    function updateLocationIndicator(locationName) {
+      // Remove existing indicator
+      const existingIndicator = document.getElementById('formLocationIndicator');
+      if (existingIndicator) {
+        existingIndicator.remove();
+      }
+      
+      // Find the post actions container
+      const postActionsContainer = document.querySelector('.post-actions-container');
+      if (postActionsContainer) {
+        const locationIndicator = document.createElement('div');
+        locationIndicator.id = 'formLocationIndicator';
+        locationIndicator.className = 'flex items-center mt-3 p-3 bg-brand-100 border-2 border-brand-400 rounded-xl shadow-sm';
+        locationIndicator.innerHTML = `
+          <svg class="w-4 h-4 mr-2 text-brand-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-sm font-medium text-brand-700">${locationName}</span>
+          <button type="button" onclick="removeLocationFromPost()" class="p-1 ml-auto text-gray-400 transition-colors rounded-full hover:text-red-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        `;
+        postActionsContainer.appendChild(locationIndicator);
+      }
+    }
+    
+    // Global function to remove location from post
+    window.removeLocationFromPost = function() {
+      const postLocation = document.getElementById('postLocation');
+      if (postLocation) postLocation.value = '';
+      
+      const formLocationIndicator = document.getElementById('formLocationIndicator');
+      if (formLocationIndicator) {
+        formLocationIndicator.remove();
+      }
+      
+      selectedLocation = null;
+      showNotification('Location removed from post', 'info');
+    };
+    
+    // Reset location when form is reset
+    const postForm = document.querySelector('form[action*="/posts"]');
+    if (postForm) {
+      postForm.addEventListener('reset', function() {
+        if (postLocation) postLocation.value = '';
+        const formLocationIndicator = document.getElementById('formLocationIndicator');
+        if (formLocationIndicator) {
+          formLocationIndicator.remove();
+        }
+        selectedLocation = null;
+      });
+    }
+  });
+
+  // Notification system for location
   function showNotification(message, type = 'info') {
     // Create notification element
     const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transition-all duration-300 ${
+    notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transition-all duration-300 max-w-sm ${
       type === 'success' ? 'bg-green-500 text-white' :
       type === 'error' ? 'bg-red-500 text-white' :
       'bg-blue-500 text-white'
     }`;
-    notification.textContent = message;
+    notification.innerHTML = `
+      <div class="flex items-start">
+        <div class="flex-shrink-0 mr-2">
+          ${type === 'success' ? 
+            '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>' :
+            type === 'error' ?
+            '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>' :
+            '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>'
+          }
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium">${message}</p>
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()" class="flex-shrink-0 ml-2 text-white hover:text-gray-200">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+          </svg>
+        </button>
+      </div>
+    `;
     
     document.body.appendChild(notification);
     
-    // Remove notification after 3 seconds
+    // Auto-remove notification after 8 seconds (longer for error messages)
+    const timeout = type === 'error' ? 8000 : 3000;
     setTimeout(() => {
-      notification.remove();
-    }, 3000);
+      if (notification.parentElement) {
+        notification.remove();
+      }
+    }, timeout);
   }
 
   // Emoji Picker Functions
@@ -1291,14 +1812,14 @@ function getCurrentUserEmail() {
           const reader = new FileReader();
           reader.onload = function(e) {
             mediaItem.innerHTML = `
-              <img src="${e.target.result}" alt="Preview" class="w-full h-24 object-cover rounded-lg border">
+              <img src="${e.target.result}" alt="Preview" class="object-cover w-full h-24 border rounded-lg">
               <button type="button" onclick="removeMediaItem(${index})" 
-                      class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      class="absolute flex items-center justify-center w-6 h-6 text-white transition-opacity bg-red-500 rounded-full opacity-0 top-1 right-1 group-hover:opacity-100">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
               </button>
-              <div class="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
+              <div class="absolute px-1 text-xs text-white bg-black bg-opacity-50 rounded bottom-1 left-1">
                 IMG
               </div>
             `;
@@ -1308,16 +1829,16 @@ function getCurrentUserEmail() {
           // Handle video files
           const videoUrl = URL.createObjectURL(file);
           mediaItem.innerHTML = `
-            <video class="w-full h-24 object-cover rounded-lg border" muted>
+            <video class="object-cover w-full h-24 border rounded-lg" muted>
               <source src="${videoUrl}" type="${file.type}">
             </video>
             <button type="button" onclick="removeMediaItem(${index})" 
-                    class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    class="absolute flex items-center justify-center w-6 h-6 text-white transition-opacity bg-red-500 rounded-full opacity-0 top-1 right-1 group-hover:opacity-100">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
               </svg>
             </button>
-            <div class="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
+            <div class="absolute px-1 text-xs text-white bg-black bg-opacity-50 rounded bottom-1 left-1">
               VIDEO
             </div>
             <div class="absolute inset-0 flex items-center justify-center">
@@ -1451,7 +1972,7 @@ function getCurrentUserEmail() {
 
       <div class="overflow-y-auto max-h-[calc(90vh-140px)]">
 
-        <form id="profileForm" onsubmit="updateProfileAjax(event)" class="pb-4 pt-2 px-4 space-y-4">
+        <form id="profileForm" onsubmit="updateProfileAjax(event)" class="px-4 pt-2 pb-4 space-y-4">
           <!-- CSRF Token -->
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" name="_csrf"/>
           
@@ -1500,9 +2021,7 @@ function getCurrentUserEmail() {
             <div class="flex items-start gap-4">
               <div class="flex-1">
                 <input type="file" id="profilePicture" name="profilePicture" accept="image/*" onchange="previewProfileImage(this)"
-                       class="w-full px-3 py-2 text-sm text-gray-700 bg-gray-100 border border-gray-300 rounded-md focus:outline-none
-                        focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium
-                       file:bg-brand-600 file:text-white transition-transform hover:scale-105 hover:file:bg-brand-700">
+                       class="w-full px-3 py-2 text-sm text-gray-700 transition-transform bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-brand-600 file:text-white hover:scale-105 hover:file:bg-brand-700">
                 <p class="mt-1 text-xs text-gray-400">JPG, PNG, GIF (max 10MB)</p>
               </div>
               <div id="imagePreview" class="hidden">
@@ -1573,10 +2092,10 @@ function getCurrentUserEmail() {
       </div>
 
 <!--       Fixed Footer with Buttons-->
-      <div class=" py-4   px-6 bg-white border-t border-gray-300">
+      <div class="px-6 py-4 bg-white border-t border-gray-300 ">
         <div class="flex gap-3 ">
           <button type="button" onclick="closeProfileSettingsModal()"
-                  class="flex-1 px-4 py-2 text-black transition-transform hover:scale-105 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                  class="flex-1 px-4 py-2 text-black transition-transform bg-gray-200 rounded-md hover:scale-105 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">
             Cancel
           </button>
           <button type="submit" form="profileForm"
@@ -1589,11 +2108,88 @@ function getCurrentUserEmail() {
   </div>
 </div>
 
+<!-- Location Modal -->
+<div id="locationModal" class="fixed inset-0 z-50 items-center justify-center hidden overflow-auto bg-black bg-opacity-70 backdrop-blur-sm">
+    <div class="w-full max-w-md mx-4 transition-all transform bg-white shadow-2xl rounded-xl">
+        <div class="p-6">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold text-black">Add Location</h3>
+                <button id="closeLocationModal" class="p-1 text-gray-500 transition-colors rounded-full hover:text-black hover:bg-gray-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Location Search Input -->
+            <div class="relative mb-4">
+                <div class="flex items-center p-3 transition-colors border-2 border-gray-200 rounded-xl focus-within:border-brand-500">
+                    <svg class="w-5 h-5 mr-3 text-brand-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                    </svg>
+                    <input type="text" id="locationSearch" placeholder="Search for a location..." 
+                           class="w-full text-gray-700 placeholder-gray-400 bg-transparent border-none outline-none focus:ring-0" />
+                </div>
+            </div>
+
+            <!-- Get Current Location Button -->
+            <button id="getCurrentLocation" class="flex items-center w-full p-4 mb-4 text-left transition-all border-2 border-gray-200 rounded-xl hover:border-brand-300 hover:bg-brand-50 group">
+                <div class="flex items-center justify-center w-12 h-12 mr-4 transition-colors rounded-full bg-brand-100 text-brand-600 group-hover:bg-brand-200">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-800">Use current location</p>
+                    <p class="text-sm text-gray-600">Share your precise location</p>
+                </div>
+                <div class="ml-auto">
+                    <svg class="w-5 h-5 text-gray-400 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </button>
+
+            <!-- Location Results -->
+            <div id="locationResults" class="mt-4 space-y-2 overflow-y-auto max-h-60"></div>
+
+            <!-- Selected Location Display -->
+            <div id="selectedLocationContainer" class="items-center hidden p-4 mt-4 border-2 rounded-xl bg-brand-100 border-brand-400">
+                <div class="flex-shrink-0 mr-3 text-brand-600">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p id="selectedLocationText" class="font-medium text-gray-800"></p>
+                    <p class="text-sm text-gray-600">Selected location</p>
+                </div>
+                <button id="removeSelectedLocation" class="p-1 text-gray-400 transition-colors rounded-full hover:text-red-500 hover:bg-red-50">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex justify-end gap-3 mt-6">
+                <button id="cancelLocationBtn" class="px-6 py-2 text-sm font-medium text-gray-700 transition-all bg-gray-200 rounded-xl hover:bg-gray-300 hover:scale-105">
+                    Cancel
+                </button>
+                <button id="addLocationBtn" class="px-6 py-2 text-sm font-medium text-white transition-all shadow-md rounded-xl bg-brand-600 hover:bg-brand-700 hover:scale-105 shadow-brand-500/50">
+                    Add Location
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Image Modal for full-size viewing (Profile Pictures) -->
 <div id="imageModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-90 backdrop-blur-sm">
     <div class="flex items-center justify-center w-full h-full p-4">
         <div class="relative max-w-4xl max-h-full">
-            <button id="closeImageModal" class="absolute top-2 right-2 z-10 p-2 text-white bg-black bg-opacity-50 rounded-full hover:bg-opacity-70">
+            <button id="closeImageModal" class="absolute z-10 p-2 text-white bg-black bg-opacity-50 rounded-full top-2 right-2 hover:bg-opacity-70">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>

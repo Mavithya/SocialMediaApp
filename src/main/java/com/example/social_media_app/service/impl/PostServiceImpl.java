@@ -48,7 +48,7 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public void deletePost(Long id) {
         Post post = findById(id);
-        
+
         // Delete associated media files from filesystem
         List<PostMedia> mediaFiles = post.getMediaFiles();
         if (mediaFiles != null) {
@@ -60,8 +60,9 @@ public class PostServiceImpl implements PostService {
                 }
             }
         }
-        
-        // Delete the post (this will cascade delete media records due to cascade = CascadeType.ALL)
+
+        // Delete the post (this will cascade delete media records due to cascade =
+        // CascadeType.ALL)
         postRepository.delete(post);
     }
 
@@ -79,8 +80,9 @@ public class PostServiceImpl implements PostService {
                 }
             }
         }
-        
-        // Delete the post (this will cascade delete media records due to cascade = CascadeType.ALL)
+
+        // Delete the post (this will cascade delete media records due to cascade =
+        // CascadeType.ALL)
         postRepository.delete(post);
     }
 
@@ -95,7 +97,31 @@ public class PostServiceImpl implements PostService {
         post.setUpdatedAt(LocalDateTime.now());
         post.setLikeCount(0);
         post.setCommentCount(0);
-        
+
+        return postRepository.save(post);
+    }
+
+    @Override
+    @Transactional
+    public Post createPost(String content, User user, String locationName, Double locationLatitude,
+            Double locationLongitude, String locationType) {
+        Post post = new Post();
+        post.setContent(content);
+        post.setUser(user);
+        post.setAuthorId(user.getId());
+        post.setCreatedAt(LocalDateTime.now());
+        post.setUpdatedAt(LocalDateTime.now());
+        post.setLikeCount(0);
+        post.setCommentCount(0);
+
+        // Set location data if provided
+        if (locationName != null && !locationName.trim().isEmpty()) {
+            post.setLocationName(locationName);
+            post.setLocationLatitude(locationLatitude);
+            post.setLocationLongitude(locationLongitude);
+            post.setLocationType(locationType);
+        }
+
         return postRepository.save(post);
     }
 
@@ -110,20 +136,20 @@ public class PostServiceImpl implements PostService {
         post.setUpdatedAt(LocalDateTime.now());
         post.setLikeCount(0);
         post.setCommentCount(0);
-        
+
         // Save post first to get the ID
         post = postRepository.save(post);
-        
+
         // Handle media files if provided
         if (mediaFiles != null && !mediaFiles.isEmpty()) {
             try {
                 String uploadDirectory = "posts";
                 int order = 0;
-                
+
                 for (MultipartFile file : mediaFiles) {
                     if (!file.isEmpty() && fileUploadService.isValidFileType(file)) {
                         String filePath = fileUploadService.uploadFile(file, uploadDirectory);
-                        
+
                         PostMedia postMedia = PostMedia.builder()
                                 .post(post)
                                 .fileName(file.getOriginalFilename())
@@ -133,17 +159,76 @@ public class PostServiceImpl implements PostService {
                                 .fileSize(file.getSize())
                                 .uploadOrder(order++)
                                 .build();
-                        
+
                         postMediaRepository.save(postMedia);
                     }
                 }
             } catch (Exception e) {
                 log.error("Error uploading media files for post {}: {}", post.getId(), e.getMessage(), e);
-                // You might want to handle this differently - maybe fail the entire post creation
+                // You might want to handle this differently - maybe fail the entire post
+                // creation
                 // For now, we'll continue without media
             }
         }
-        
+
+        return post;
+    }
+
+    @Override
+    @Transactional
+    public Post createPost(String content, User user, List<MultipartFile> mediaFiles, String locationName,
+            Double locationLatitude, Double locationLongitude, String locationType) {
+        Post post = new Post();
+        post.setContent(content);
+        post.setUser(user);
+        post.setAuthorId(user.getId());
+        post.setCreatedAt(LocalDateTime.now());
+        post.setUpdatedAt(LocalDateTime.now());
+        post.setLikeCount(0);
+        post.setCommentCount(0);
+
+        // Set location data if provided
+        if (locationName != null && !locationName.trim().isEmpty()) {
+            post.setLocationName(locationName);
+            post.setLocationLatitude(locationLatitude);
+            post.setLocationLongitude(locationLongitude);
+            post.setLocationType(locationType);
+        }
+
+        // Save post first to get the ID
+        post = postRepository.save(post);
+
+        // Handle media files if provided
+        if (mediaFiles != null && !mediaFiles.isEmpty()) {
+            try {
+                String uploadDirectory = "posts";
+                int order = 0;
+
+                for (MultipartFile file : mediaFiles) {
+                    if (!file.isEmpty() && fileUploadService.isValidFileType(file)) {
+                        String filePath = fileUploadService.uploadFile(file, uploadDirectory);
+
+                        PostMedia postMedia = PostMedia.builder()
+                                .post(post)
+                                .fileName(file.getOriginalFilename())
+                                .filePath(filePath)
+                                .fileType(fileUploadService.getFileTypeCategory(file))
+                                .mimeType(file.getContentType())
+                                .fileSize(file.getSize())
+                                .uploadOrder(order++)
+                                .build();
+
+                        postMediaRepository.save(postMedia);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error uploading media files for post {}: {}", post.getId(), e.getMessage(), e);
+                // You might want to handle this differently - maybe fail the entire post
+                // creation
+                // For now, we'll continue without media
+            }
+        }
+
         return post;
     }
 
