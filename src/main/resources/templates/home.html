@@ -224,14 +224,20 @@
       const postId = post.dataset.postId;
       const likeButton = post.querySelector('.like-button');
       const commentButton = post.querySelector('.comment-button');
+      const shareButton = post.querySelector('.share-button');
       const deleteButton = post.querySelector('.delete-post-button');
 
       // Initialize like count and status
       fetchLikeStatus(postId, likeButton);
       
+      // Initialize share count and status
+      fetchShareStatus(postId, shareButton);
+      
       likeButton.addEventListener('click', () => toggleLike(postId, likeButton));
       
       commentButton.addEventListener('click', () => openCommentModal(postId));
+
+      shareButton.addEventListener('click', () => openShareModal(postId));
 
       if (deleteButton) {
         deleteButton.addEventListener('click', () => deletePost(postId));
@@ -261,6 +267,31 @@
     document.getElementById('commentModal').addEventListener('click', function(e) {
       if (e.target === this) {
         closeCommentModal();
+      }
+    });
+
+    // Add event listeners for share modal
+    document.getElementById('closeShareModal').addEventListener('click', closeShareModal);
+    
+    document.getElementById('shareModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeShareModal();
+      }
+    });
+
+    document.getElementById('shareToFeed').addEventListener('click', function() {
+      const modal = document.getElementById('shareModal');
+      const postId = modal.dataset.postId;
+      if (postId) {
+        shareToFeed(postId);
+      }
+    });
+
+    document.getElementById('copyLink').addEventListener('click', function() {
+      const modal = document.getElementById('shareModal');
+      const postId = modal.dataset.postId;
+      if (postId) {
+        copyPostLink(postId);
       }
     });
 
@@ -343,6 +374,283 @@
       svg.setAttribute('fill', 'none');
       svg.setAttribute('stroke', 'currentColor');
     }
+  }
+
+  // Share functionality
+  // Function to fetch and update share status
+  function fetchShareStatus(postId, shareButton) {
+    const currentUser = getCurrentUserEmail();
+    if (!currentUser) {
+      console.error('No current user found for share status check');
+      return;
+    }
+
+    fetch(`/api/shares/${postId}/status`, {
+      method: 'GET',
+      headers: {
+        [csrfHeader]: csrfToken,
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log(`Fetching share status for post ${postId}: user=${currentUser}, shared=${data.shared}, count=${data.shareCount}`);
+        updateShareButton(shareButton, data.shared, data.shareCount);
+      })
+      .catch(error => {
+        console.error('Error fetching share status:', error);
+        // Set default state on error
+        updateShareButton(shareButton, false, 0);
+      });
+  }
+
+  // Function to toggle share
+  function toggleShare(postId, shareButton) {
+    fetch(`/api/shares/${postId}`, {
+      method: 'POST',
+      headers: {
+        [csrfHeader]: csrfToken
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        updateShareButton(shareButton, data.shared, data.shareCount);
+        
+        // Show notification
+        if (data.shared) {
+          showNotification('Post shared successfully!', 'success');
+        } else {
+          showNotification('Share removed', 'success');
+        }
+      })
+      .catch(error => {
+        console.error('Error toggling share:', error);
+        showNotification('Failed to share post', 'error');
+      });
+  }
+
+  // Function to update share button appearance
+  function updateShareButton(button, isShared, shareCount) {
+    const countSpan = button.querySelector('.share-count');
+    const buttonText = button.querySelector('.share-text') || button.childNodes[button.childNodes.length - 2];
+    
+    countSpan.textContent = shareCount;
+    
+    const postId = button.closest('.post-card').dataset.postId;
+    console.log(`Post ${postId}: isShared=${isShared}, shareCount=${shareCount}`);
+
+    // Update the share icon and color
+    const svg = button.querySelector('svg');
+    
+    if (isShared) {
+      button.classList.add('text-blue-500');
+      button.classList.remove('text-gray-700');
+      svg.setAttribute('fill', 'currentColor');
+      svg.setAttribute('stroke', 'none');
+      
+      // Add unshare option
+      button.setAttribute('data-shared', 'true');
+    } else {
+      button.classList.remove('text-blue-500');
+      button.classList.add('text-gray-700');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', 'currentColor');
+      
+      // Remove unshare option
+      button.removeAttribute('data-shared');
+    }
+  }
+
+  // Share Modal Functions
+  function openShareModal(postId) {
+    const modal = document.getElementById('shareModal');
+    const sharePostPreview = document.getElementById('sharePostPreview');
+    const shareButton = document.querySelector(`[data-post-id="${postId}"] .share-button`);
+    const shareToFeedBtn = document.getElementById('shareToFeed');
+    
+    // Store the current post ID
+    modal.dataset.postId = postId;
+    
+    // Check if already shared
+    const isAlreadyShared = shareButton.getAttribute('data-shared') === 'true';
+    
+    if (isAlreadyShared) {
+      // Show unshare option
+      shareToFeedBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18"></path>
+          <path d="M19 6v14c0 1-1 2-2 2H7c0-1-1-2-2-2V6"></path>
+          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+        </svg>
+        Remove Share
+      `;
+      shareToFeedBtn.classList.remove('bg-brand-500', 'hover:bg-brand-600');
+      shareToFeedBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+    } else {
+      // Show share option
+      shareToFeedBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+          <path d="M16 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+          <path d="M8 7l8 5l-8 5z" />
+        </svg>
+        Share Post
+      `;
+      shareToFeedBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+      shareToFeedBtn.classList.add('bg-brand-500', 'hover:bg-brand-600');
+    }
+    
+    // Get post data for preview
+    const postCard = document.querySelector(`[data-post-id="${postId}"]`);
+    const postContent = postCard.querySelector('.post-content-scroll p')?.textContent || 'Shared a post';
+    const postAuthor = postCard.querySelector('.font-medium').textContent;
+    
+    // Update preview
+    sharePostPreview.innerHTML = `
+      <div class="flex items-start gap-2">
+        <div class="w-8 h-8 bg-brand-300 rounded-full flex items-center justify-center">
+          <svg class="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-900">${postAuthor}</p>
+          <p class="text-sm text-gray-600 line-clamp-2">${postContent.substring(0, 100)}${postContent.length > 100 ? '...' : ''}</p>
+        </div>
+      </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+  
+  function closeShareModal() {
+    const modal = document.getElementById('shareModal');
+    const shareTextArea = document.getElementById('shareTextArea');
+    
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    shareTextArea.value = ''; // Clear the text area
+    delete modal.dataset.postId;
+  }
+  
+  function shareToFeed(postId) {
+    const shareButton = document.querySelector(`[data-post-id="${postId}"] .share-button`);
+    const shareText = document.getElementById('shareTextArea').value.trim();
+    const isAlreadyShared = shareButton.getAttribute('data-shared') === 'true';
+    
+    // Show loading state
+    const shareBtn = document.getElementById('shareToFeed');
+    const originalText = shareBtn.innerHTML;
+    shareBtn.disabled = true;
+    shareBtn.innerHTML = '<span class="loading loading-spinner loading-xs"></span> Processing...';
+    
+    if (isAlreadyShared) {
+      // Unshare the post
+      fetch(`/api/shares/${postId}`, {
+        method: 'DELETE',
+        headers: {
+          [csrfHeader]: csrfToken
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          updateShareButton(shareButton, false, data.shareCount);
+          closeShareModal();
+          showNotification(data.message || 'Share removed successfully!', 'success');
+          
+          // Refresh the page to remove shared post from feed
+          setTimeout(() => {
+            location.reload();
+          }, 1000);
+        })
+        .catch(error => {
+          console.error('Error unsharing post:', error);
+          showNotification('Failed to remove share', 'error');
+        })
+        .finally(() => {
+          shareBtn.disabled = false;
+          shareBtn.innerHTML = originalText;
+          closeShareModal();
+        });
+    } else {
+      // Share the post
+      fetch(`/api/shares/${postId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [csrfHeader]: csrfToken
+        },
+        body: JSON.stringify({
+          shareText: shareText
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.shared) {
+            updateShareButton(shareButton, true, data.shareCount);
+            closeShareModal();
+            showNotification(data.message || 'Post shared to your feed!', 'success');
+            
+            // Refresh the page to show the new shared post
+            setTimeout(() => {
+              location.reload();
+            }, 1000);
+          } else {
+            showNotification(data.error || 'Failed to share post', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('Error sharing post:', error);
+          showNotification('Failed to share post', 'error');
+        })
+        .finally(() => {
+          shareBtn.disabled = false;
+          shareBtn.innerHTML = originalText;
+          closeShareModal();
+        });
+    }
+  }
+  
+  function copyPostLink(postId) {
+    const postUrl = `${window.location.origin}/posts/${postId}`;
+    
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(postUrl).then(() => {
+        showNotification('Link copied to clipboard!', 'success');
+        closeShareModal();
+      }).catch(() => {
+        fallbackCopyText(postUrl);
+      });
+    } else {
+      fallbackCopyText(postUrl);
+    }
+  }
+  
+  function fallbackCopyText(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      document.execCommand('copy');
+      showNotification('Link copied to clipboard!', 'success');
+      closeShareModal();
+    } catch (err) {
+      showNotification('Failed to copy link', 'error');
+    }
+    
+    document.body.removeChild(textArea);
   }
 
   // Function to open comment modal

@@ -69,6 +69,11 @@ public class User {
     @JsonIgnore
     private List<Like> likes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
+    @JsonIgnore
+    private List<Share> shares = new ArrayList<>();
+
     @PrePersist
     public void prePersist() {
         if (username == null || username.isEmpty()) {

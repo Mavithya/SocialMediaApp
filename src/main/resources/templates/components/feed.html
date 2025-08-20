@@ -186,6 +186,69 @@
                        th:if="${!#strings.isEmpty(post.content)}">Post content…</p>
                 </div>
 
+                <!-- Shared post content (if this is a shared post) -->
+                <div th:if="${post.isSharedPost != null and post.isSharedPost and post.sharedPost != null}" 
+                     class="mb-4 p-4 bg-gray-50 rounded-lg border-l-4 border-brand-400">
+                    <div class="flex items-center gap-2 mb-3 text-sm text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                            <path d="M18 6m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                            <path d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                            <path d="M8.7 10.7l6.6 -3.4" />
+                            <path d="M8.7 13.3l6.6 3.4" />
+                        </svg>
+                        <span>Shared from 
+                            <strong th:text="${post.sharedPost.user.firstName + ' ' + post.sharedPost.user.lastName}">Original Author</strong>
+                        </span>
+                        <span class="text-gray-400">•</span>
+                        <span th:text="${post.sharedPost.timeAgo}">original time</span>
+                    </div>
+                    
+                    <!-- Original post content -->
+                    <div class="shared-post-content">
+                        <p class="text-gray-700 break-words whitespace-pre-wrap mb-3" 
+                           th:text="${post.sharedPost.content}" 
+                           th:if="${!#strings.isEmpty(post.sharedPost.content)}">
+                           Original post content
+                        </p>
+                        
+                        <!-- Original post media -->
+                        <div th:if="${post.sharedPost.mediaFiles != null and !post.sharedPost.mediaFiles.isEmpty()}" 
+                             class="grid gap-2" th:classappend="${#lists.size(post.sharedPost.mediaFiles) == 1} ? 'grid-cols-1' : 'grid-cols-2'">
+                            <div th:each="media, iterStat : ${post.sharedPost.mediaFiles}" th:if="${iterStat.index < 2}">
+                                <div th:if="${media.fileType == 'image'}" class="relative">
+                                    <img th:src="${media.filePath}" 
+                                         th:alt="${media.fileName}" 
+                                         class="object-cover w-full h-32 border border-gray-200 rounded-lg cursor-pointer"
+                                         onclick="openImageModal(this.src)"/>
+                                </div>
+                                <div th:if="${media.fileType == 'video'}" class="relative">
+                                    <video controls class="w-full h-32 border border-gray-200 rounded-lg">
+                                        <source th:src="${media.filePath}" th:type="${media.mimeType}"/>
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                                
+                                <!-- Show "+X more" overlay for additional media -->
+                                <div th:if="${#lists.size(post.sharedPost.mediaFiles) > 2 and iterStat.index == 1}" 
+                                     class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                                    <span class="text-lg font-semibold text-white" 
+                                          th:text="'+' + ${#lists.size(post.sharedPost.mediaFiles) - 2} + ' more'">+X more</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Original post location -->
+                        <div th:if="${post.sharedPost.locationName != null and !#strings.isEmpty(post.sharedPost.locationName)}" 
+                             class="flex items-center gap-1 mt-2 text-sm text-gray-500">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span th:text="${post.sharedPost.locationName}">Location</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Media attachments -->
                 <div th:if="${post.mediaFiles != null and !post.mediaFiles.isEmpty()}" class="mb-4">
                     <div th:switch="${#lists.size(post.mediaFiles)}">
@@ -290,8 +353,8 @@
                         </svg>
                         Comment
                     </button>
-                    <button class="text-gray-700 btn btn-ghost btn-sm">
-                        <svg  xmlns="http://www.w3.org/2000/svg"  width="20"  height="20"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-share">
+                    <button class="text-gray-700 btn btn-ghost btn-sm hover:text-blue-500 share-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-share">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                             <path d="M6 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
                             <path d="M18 6m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
@@ -300,6 +363,7 @@
                             <path d="M8.7 13.3l6.6 3.4" />
                         </svg>
                         Share
+                        <span class="share-count">0</span>
                     </button>
                 </div>
             </div>
@@ -422,6 +486,61 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="fixed inset-0 z-50 items-center justify-center hidden overflow-auto bg-black bg-opacity-70 backdrop-blur-sm">
+        <div class="relative w-full max-w-md mx-4 transition-all transform bg-white rounded-lg shadow-xl">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold text-black">Share Post</h3>
+                    <button id="closeShareModal" class="text-gray-700 hover:text-black">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <!-- Share text input -->
+                    <div>
+                        <textarea 
+                            id="shareTextArea" 
+                            rows="3" 
+                            placeholder="Share your thoughts about this post..."
+                            class="w-full px-3 py-2 text-gray-700 placeholder-gray-400 border border-gray-200 rounded-lg resize-none bg-gray-50 focus:ring-2 focus:border-none focus:ring-brand-400 focus:outline-none focus:border-transparent"
+                        ></textarea>
+                    </div>
+                    
+                    <!-- Original post preview -->
+                    <div class="p-4 bg-gray-50 rounded-lg border-l-4 border-brand-400">
+                        <p class="text-sm text-gray-600 mb-2">Sharing:</p>
+                        <div id="sharePostPreview" class="text-gray-800">
+                            <!-- Post preview will be inserted here -->
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="shareToFeed" class="flex items-center justify-center gap-2 px-4 py-3 text-white transition-transform rounded-lg bg-brand-500 hover:bg-brand-600 hover:scale-105">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                                <path d="M16 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                                <path d="M8 7l8 5l-8 5z" />
+                            </svg>
+                            Share Post
+                        </button>
+                        
+                        <button id="copyLink" class="flex items-center justify-center gap-2 px-4 py-3 text-gray-700 transition-transform bg-gray-200 rounded-lg hover:bg-gray-300 hover:scale-105">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                            </svg>
+                            Copy Link
+                        </button>
                     </div>
                 </div>
             </div>

@@ -7,6 +7,7 @@ import com.example.social_media_app.repository.LikeRepository;
 import com.example.social_media_app.repository.CommentRepository;
 import com.example.social_media_app.repository.PostRepository;
 import com.example.social_media_app.repository.PostMediaRepository;
+import com.example.social_media_app.repository.ShareRepository;
 import com.example.social_media_app.service.PostService;
 import com.example.social_media_app.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class PostServiceImpl implements PostService {
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
     private final PostMediaRepository postMediaRepository;
+    private final ShareRepository shareRepository;
     private final FileUploadService fileUploadService;
 
     @Override
@@ -97,6 +99,7 @@ public class PostServiceImpl implements PostService {
         post.setUpdatedAt(LocalDateTime.now());
         post.setLikeCount(0);
         post.setCommentCount(0);
+        post.setShareCount(0);
 
         return postRepository.save(post);
     }
@@ -113,6 +116,7 @@ public class PostServiceImpl implements PostService {
         post.setUpdatedAt(LocalDateTime.now());
         post.setLikeCount(0);
         post.setCommentCount(0);
+        post.setShareCount(0);
 
         // Set location data if provided
         if (locationName != null && !locationName.trim().isEmpty()) {
@@ -136,6 +140,7 @@ public class PostServiceImpl implements PostService {
         post.setUpdatedAt(LocalDateTime.now());
         post.setLikeCount(0);
         post.setCommentCount(0);
+        post.setShareCount(0);
 
         // Save post first to get the ID
         post = postRepository.save(post);
@@ -186,6 +191,7 @@ public class PostServiceImpl implements PostService {
         post.setUpdatedAt(LocalDateTime.now());
         post.setLikeCount(0);
         post.setCommentCount(0);
+        post.setShareCount(0);
 
         // Set location data if provided
         if (locationName != null && !locationName.trim().isEmpty()) {
@@ -251,6 +257,8 @@ public class PostServiceImpl implements PostService {
             post.setLikeCount(0);
         if (post.getCommentCount() == null)
             post.setCommentCount(0);
+        if (post.getShareCount() == null)
+            post.setShareCount(0);
         if (post.getCreatedAt() == null)
             post.setCreatedAt(LocalDateTime.now());
         post.setUpdatedAt(LocalDateTime.now());
@@ -275,6 +283,13 @@ public class PostServiceImpl implements PostService {
         int commentCount = commentRepository.countByPost(post);
         if (post.getCommentCount() == null || post.getCommentCount() != commentCount) {
             post.setCommentCount(commentCount);
+            postRepository.save(post);
+        }
+
+        // Update share count
+        int shareCount = shareRepository.countByOriginalPost(post);
+        if (post.getShareCount() == null || post.getShareCount() != shareCount) {
+            post.setShareCount(shareCount);
             postRepository.save(post);
         }
     }

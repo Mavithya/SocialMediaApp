@@ -43,6 +43,22 @@ public class Post {
     @Builder.Default
     private List<Like> likes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "originalPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("originalPost")
+    @ToString.Exclude
+    @Builder.Default
+    private List<Share> shares = new ArrayList<>();
+
+    // Shared post reference
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "shared_post_id")
+    @JsonIgnoreProperties({"shares", "comments", "likes"})
+    private Post sharedPost;
+
+    @Column(name = "is_shared_post")
+    @Builder.Default
+    private Boolean isSharedPost = false;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("uploadOrder ASC")
     @JsonIgnoreProperties("post")
@@ -72,6 +88,10 @@ public class Post {
     private Integer commentCount = 0;
 
     @Builder.Default
+    @Column(name = "share_count")
+    private Integer shareCount = 0;
+
+    @Builder.Default
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -87,6 +107,10 @@ public class Post {
             likeCount = 0;
         if (commentCount == null)
             commentCount = 0;
+        if (shareCount == null)
+            shareCount = 0;
+        if (isSharedPost == null)
+            isSharedPost = false;
     }
 
     @PreUpdate
