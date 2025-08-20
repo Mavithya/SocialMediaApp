@@ -47,11 +47,11 @@ public class User {
     private String username;
 
     private String city;
-    
+
     private String country;
-    
+
     private String education;
-    
+
     private String workplace;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

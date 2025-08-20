@@ -2,7 +2,8 @@
 DROP TABLE IF EXISTS shares;
 
 -- Create shares table with new structure
-CREATE TABLE shares (
+CREATE TABLE shares
+(
     id BIGSERIAL PRIMARY KEY,
     original_post_id BIGINT NOT NULL,
     shared_post_id BIGINT NOT NULL,
@@ -16,9 +17,12 @@ CREATE TABLE shares (
 );
 
 -- Add columns to posts table for shared post functionality
-ALTER TABLE posts ADD COLUMN IF NOT EXISTS shared_post_id BIGINT;
-ALTER TABLE posts ADD COLUMN IF NOT EXISTS is_shared_post BOOLEAN DEFAULT FALSE;
-ALTER TABLE posts ADD COLUMN IF NOT EXISTS share_count INTEGER DEFAULT 0;
+ALTER TABLE posts ADD COLUMN
+IF NOT EXISTS shared_post_id BIGINT;
+ALTER TABLE posts ADD COLUMN
+IF NOT EXISTS is_shared_post BOOLEAN DEFAULT FALSE;
+ALTER TABLE posts ADD COLUMN
+IF NOT EXISTS share_count INTEGER DEFAULT 0;
 
 -- Add foreign key for shared_post_id
 ALTER TABLE posts ADD CONSTRAINT fk_posts_shared_post 

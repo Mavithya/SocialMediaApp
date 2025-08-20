@@ -52,7 +52,7 @@ public class ShareServiceImpl implements ShareService {
                 .shareText(shareText)
                 .createdAt(LocalDateTime.now())
                 .build();
-        
+
         shareRepository.save(share);
 
         // Update original post share count
@@ -66,17 +66,17 @@ public class ShareServiceImpl implements ShareService {
     @Transactional
     public boolean unsharePost(Post originalPost, User user) {
         Share share = shareRepository.findByOriginalPostAndUser(originalPost, user).orElse(null);
-        
+
         if (share != null) {
             // Delete the shared post
             Post sharedPost = share.getSharedPost();
             shareRepository.delete(share);
             postRepository.delete(sharedPost);
-            
+
             // Update original post share count
             originalPost.setShareCount(Math.max(0, originalPost.getShareCount() - 1));
             postRepository.save(originalPost);
-            
+
             return true;
         }
         return false;

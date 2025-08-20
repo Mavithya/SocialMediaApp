@@ -27,8 +27,7 @@ public class ShareController {
     public ResponseEntity<Map<String, Object>> sharePost(
             @PathVariable Long postId,
             @RequestBody(required = false) Map<String, String> shareData,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
             User user = userService.findByEmail(userDetails.getUsername());
             Post originalPost = postService.findById(postId);
@@ -38,7 +37,7 @@ public class ShareController {
             }
 
             String shareText = shareData != null ? shareData.get("shareText") : "";
-            
+
             Post sharedPost = shareService.sharePost(originalPost, user, shareText);
             int shareCount = shareService.getShareCount(originalPost);
 
@@ -53,11 +52,11 @@ public class ShareController {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
             errorResponse.put("shared", true); // Already shared
-            
+
             // Get current share count
             Post post = postService.findById(postId);
             errorResponse.put("shareCount", shareService.getShareCount(post));
-            
+
             return ResponseEntity.badRequest().body(errorResponse);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
@@ -69,8 +68,7 @@ public class ShareController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<Map<String, Object>> unsharePost(
             @PathVariable Long postId,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
             User user = userService.findByEmail(userDetails.getUsername());
             Post originalPost = postService.findById(postId);
@@ -98,8 +96,7 @@ public class ShareController {
     @GetMapping("/{postId}/status")
     public ResponseEntity<Map<String, Object>> getShareStatus(
             @PathVariable Long postId,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
             User user = userService.findByEmail(userDetails.getUsername());
             Post post = postService.findById(postId);

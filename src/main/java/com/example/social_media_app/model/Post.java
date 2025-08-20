@@ -52,7 +52,7 @@ public class Post {
     // Shared post reference
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "shared_post_id")
-    @JsonIgnoreProperties({"shares", "comments", "likes"})
+    @JsonIgnoreProperties({ "shares", "comments", "likes" })
     private Post sharedPost;
 
     @Column(name = "is_shared_post")
