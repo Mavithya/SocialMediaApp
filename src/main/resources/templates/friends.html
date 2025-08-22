@@ -595,14 +595,12 @@
         const colorIndex = initial.charCodeAt(0) % colors.length;
         const backgroundColor = colors[colorIndex];
         
-        // Create SVG string with proper encoding
-        const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150">
-            <circle cx="75" cy="75" r="75" fill="${backgroundColor}"/>
-            <text x="75" y="90" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="60" font-weight="bold">${initial}</text>
-        </svg>`;
-        
-        // Encode the SVG properly
-        return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgContent);
+        return 'data:image/svg+xml;base64,' + btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150">
+                <circle cx="75" cy="75" r="75" fill="${backgroundColor}"/>
+                <text x="75" y="75" text-anchor="middle" dominant-baseline="central" fill="white" font-family="Arial, sans-serif" font-size="60" font-weight="bold">${initial}</text>
+            </svg>
+        `);
     }
 
     // Function to format location display
