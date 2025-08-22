@@ -1,6 +1,5 @@
 -- Add location fields to posts table (fixed data types)
-DO $
-$
+DO $$
 BEGIN
     -- Add location_name column if it doesn't exist
     IF NOT EXISTS (SELECT 1
