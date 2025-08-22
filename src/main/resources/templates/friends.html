@@ -582,17 +582,27 @@
         }
     }
 
-    // Function to get default avatar image
-    function getDefaultAvatar() {
-        return 'data:image/svg+xml;base64,' + btoa(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150">
-                <circle cx="75" cy="75" r="75" fill="#468be5"/>
-                <g fill="white">
-                    <circle cx="75" cy="55" r="20"/>
-                    <path d="M75 85 C55 85, 40 100, 40 120 L110 120 C110 100, 95 85, 75 85 Z"/>
-                </g>
-            </svg>
-        `);
+    // Function to get default avatar image with user's initial
+    function getDefaultAvatar(fullName = '') {
+        // Extract first letter of the name, default to 'U' if no name provided
+        const initial = fullName.trim() ? fullName.charAt(0).toUpperCase() : 'U';
+        
+        // Generate a consistent color based on the initial
+        const colors = [
+            '#468be5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
+            '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1'
+        ];
+        const colorIndex = initial.charCodeAt(0) % colors.length;
+        const backgroundColor = colors[colorIndex];
+        
+        // Create SVG string with proper encoding
+        const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150">
+            <circle cx="75" cy="75" r="75" fill="${backgroundColor}"/>
+            <text x="75" y="90" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="60" font-weight="bold">${initial}</text>
+        </svg>`;
+        
+        // Encode the SVG properly
+        return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgContent);
     }
 
     // Function to format location display
@@ -624,7 +634,7 @@
         const fullName = `${user.firstName} ${user.lastName}`;
         const profileImage = user.profilePicture && user.profilePicture.trim() !== '' ? 
             user.profilePicture : 
-            getDefaultAvatar();
+            getDefaultAvatar(fullName);
         
         // Format location display
         const locationDisplay = formatLocationDisplay(user.city, user.country);
@@ -795,7 +805,7 @@
         const fullName = `${friend.firstName} ${friend.lastName}`;
         const profileImage = friend.profilePicture && friend.profilePicture.trim() !== '' ?
             friend.profilePicture : 
-            getDefaultAvatar();
+            getDefaultAvatar(fullName);
 
         return `
             <div class="friend-card modern-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -836,7 +846,7 @@
         const fullName = `${sender.firstName} ${sender.lastName}`;
         const profileImage = sender.profilePicture && sender.profilePicture.trim() !== '' ?
             sender.profilePicture : 
-            getDefaultAvatar();
+            getDefaultAvatar(fullName);
         const timeAgo = getTimeAgo(request.createdAt);
 
         return `
@@ -873,7 +883,7 @@
         const fullName = `${receiver.firstName} ${receiver.lastName}`;
         const profileImage = receiver.profilePicture && receiver.profilePicture.trim() !== '' ?
             receiver.profilePicture : 
-            getDefaultAvatar();
+            getDefaultAvatar(fullName);
         const timeAgo = getTimeAgo(request.createdAt);
 
         return `
@@ -1083,13 +1093,14 @@
         const modal = document.getElementById('profileModal');
         
         // Populate modal with user data
-        document.getElementById('modalFullName').textContent = `${user.firstName} ${user.lastName}`;
+        const fullName = `${user.firstName} ${user.lastName}`;
+        document.getElementById('modalFullName').textContent = fullName;
         document.getElementById('modalEmail').textContent = user.email;
         
         // Profile image
         const profileImage = user.profilePicture && user.profilePicture.trim() !== '' ? 
             user.profilePicture : 
-            getDefaultAvatar();
+            getDefaultAvatar(fullName);
         document.getElementById('modalProfileImage').src = profileImage;
         
         // Location
