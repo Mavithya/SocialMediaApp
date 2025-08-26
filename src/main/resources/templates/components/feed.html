@@ -26,6 +26,92 @@
                           placeholder="What's on your mind?"
                           rows="3"></textarea>
 
+                <!-- Action buttons directly under textarea -->
+                <div class="flex items-center justify-between w-full mt-3 mb-3 post-actions-container">
+                    <!-- Emoji Button -->
+                    <div class="relative">
+                        <button type="button" id="emojiButton" class="text-gray-700 btn btn-ghost btn-sm" onclick="toggleEmojiPicker()">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd"/>
+                            </svg>
+                            EMOJI
+                        </button>
+                        
+                        <!-- Emoji Picker Popup -->
+                        <div id="emojiPicker" class="absolute left-0 z-40 hidden mb-2 top-10 bottom-full emoji-picker">
+                            <div class="p-5 overflow-y-auto bg-white border border-gray-200 shadow-xl rounded-2xl w-80 max-h-72">
+                                <div class="mb-3">
+                                    <h3 class="mb-2 text-sm font-semibold text-gray-700">Choose an emoji</h3>
+
+                                    <!-- Emoji Grid -->
+                                    <div class="grid grid-cols-8 gap-1 emoji-category" data-category="smileys">
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😀')">😀</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😃')">😃</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😄')">😄</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😁')">😁</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😆')">😆</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😅')">😅</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😂')">😂</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🤣')">🤣</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😊')">😊</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😇')">😇</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🙂')">🙂</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🙃')">🙃</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😉')">😉</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😌')">😌</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😍')">😍</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🥰')">🥰</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😘')">😘</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😗')">😗</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😙')">😙</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😚')">😚</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😋')">😋</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😛')">😛</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😜')">😜</button>
+                                        <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🤪')">🤪</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photo/Video Upload Button -->
+                    <div class="relative">
+                        <input type="file" id="mediaUpload" name="mediaFiles" multiple accept="image/*,video/*" class="hidden" onchange="handleMediaUpload(this)">
+                        <button type="button" onclick="document.getElementById('mediaUpload').click()" class="text-gray-700 btn btn-ghost btn-sm">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
+                            </svg>
+                            PHOTO / VIDEO
+                        </button>
+                    </div>
+
+                    <!-- Location Button -->
+                    <div class="relative">
+                        <button type="button" id="locationButton" class="text-gray-700 btn btn-ghost btn-sm">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                            LOCATION
+                        </button>
+                        
+                        <!-- Location popup - will appear below the button when shown -->
+                        <div id="locationPopup" class="absolute right-0 z-50 hidden px-3 py-2 mt-2 bg-blue-100 border border-blue-300 rounded-lg top-full min-w-max">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-sm text-gray-800">Ambalangoda, Sri Lanka</span>
+                                <button type="button" class="ml-2 text-blue-600 hover:text-blue-800">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Media Upload Section -->
                 <div id="mediaPreview" class="hidden p-3 mt-3 bg-gray-100 border-2 border-gray-300 border-dashed rounded-lg">
                     <div class="flex items-center justify-between mb-2">
@@ -40,89 +126,18 @@
                     <div id="mediaGrid" class="grid grid-cols-2 gap-2 md:grid-cols-3"></div>
                 </div>
 
-                <div class="flex flex-col">
-                    <!-- Action buttons -->
-                    <div class="flex items-center justify-between w-full mt-4 mb-4 post-actions-container">
-                        <div class="flex items-center gap-3">
-                            <!-- Emoji Button -->
-                            <div class="relative">
-                                <button type="button" id="emojiButton" class="flex items-center gap-2 px-4 py-2 text-gray-600 transition-all duration-200 rounded-lg hover:text-brand-600 hover:bg-brand-50" onclick="toggleEmojiPicker()">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd"/>
-                                    </svg>
-                                    <span class="text-sm font-medium">EMOJI</span>
-                                </button>
-                                
-                                <!-- Emoji Picker Popup -->
-                                <div id="emojiPicker" class="absolute left-0 z-50 hidden mb-2 top-10 bottom-full emoji-picker">
-                                    <div class="p-5 overflow-y-auto bg-white border border-gray-200 shadow-xl rounded-2xl w-80 max-h-72">
-                                        <div class="mb-3">
-                                            <h3 class="mb-2 text-sm font-semibold text-gray-700">Choose an emoji</h3>
-
-                                            <!-- Emoji Grid -->
-                                            <div class="grid grid-cols-8 gap-1 emoji-category" data-category="smileys">
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😀')">😀</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😃')">😃</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😄')">😄</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😁')">😁</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😆')">😆</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😅')">😅</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😂')">😂</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🤣')">🤣</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😊')">😊</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😇')">😇</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🙂')">🙂</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🙃')">🙃</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😉')">😉</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😌')">😌</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😍')">😍</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🥰')">🥰</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😘')">😘</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😗')">😗</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😙')">😙</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😚')">😚</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😋')">😋</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😛')">😛</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('😜')">😜</button>
-                                                <button type="button" class="p-1 text-lg transition-colors rounded emoji-btn hover:bg-gray-100" onclick="insertEmoji('🤪')">🤪</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Photo/Video Upload Button -->
-                            <div class="relative">
-                                <input type="file" id="mediaUpload" name="mediaFiles" multiple accept="image/*,video/*" class="hidden" onchange="handleMediaUpload(this)">
-                                <button type="button" onclick="document.getElementById('mediaUpload').click()" class="flex items-center gap-2 px-4 py-2 text-gray-600 transition-all duration-200 rounded-lg hover:text-brand-600 hover:bg-brand-50">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
-                                    </svg>
-                                    <span class="text-sm font-medium">PHOTO/VIDEO</span>
-                                </button>
-                            </div>
-
-                            <!-- Location Button -->
-                            <button type="button" id="locationButton" class="flex items-center gap-2 px-4 py-2 text-gray-600 transition-all duration-200 rounded-lg hover:text-brand-600 hover:bg-brand-50">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                                </svg>
-                                <span class="text-sm font-medium">LOCATION</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Hidden location input -->
-                    <input type="hidden" id="postLocation" name="location" value="">
-
-                    <!-- Submit Section -->
-                    <div class="flex items-center justify-end">
-                        <div class="flex gap-3">
-                            <button type="reset" class="text-gray-700 btn btn-ghost btn-sm hover:bg-gray-200 hover:shadow-sm  hover:!shadow-gray-300 transition-transform hover:scale-105" onclick="clearMediaAttachments()">Cancel</button>
-                            <button type="submit" class="btn btn-primary btn-sm !bg-brand-500 !border-brand-500 shadow-md shadow-brand-500 transition-transform hover:scale-105">Post</button>
-                        </div>
+                <!-- Counter + Submit at bottom -->
+                <div class="flex items-center justify-between w-full pt-3 mt-4">
+                    <span id="charCounter" class="text-xs text-gray-700">0/280 Characters</span>
+                    <div class="flex gap-3">
+                        <button type="reset" class="text-gray-700 btn btn-ghost btn-sm hover:bg-gray-200 hover:shadow-sm hover:!shadow-gray-300 transition-transform hover:scale-105" onclick="clearMediaAttachments()">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm !bg-brand-500 !border-brand-500 shadow-md shadow-brand-500 transition-transform hover:scale-105 disabled:text-white">Post</button>
                     </div>
                 </div>
+
+                <!-- Hidden location input -->
+                <input type="hidden" id="postLocation" name="location" value="">
+            </div>
             </div>
         </div>
     </form>
@@ -188,7 +203,7 @@
 
                 <!-- Shared post content (if this is a shared post) -->
                 <div th:if="${post.isSharedPost != null and post.isSharedPost and post.sharedPost != null}" 
-                     class="mb-4 p-4 bg-gray-50 rounded-lg border-l-4 border-brand-400">
+                     class="p-4 mb-4 border-l-4 rounded-lg bg-gray-50 border-brand-400">
                     <div class="flex items-center gap-2 mb-3 text-sm text-gray-600">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M6 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
@@ -206,7 +221,7 @@
                     
                     <!-- Original post content -->
                     <div class="shared-post-content">
-                        <p class="text-gray-700 break-words whitespace-pre-wrap mb-3" 
+                        <p class="mb-3 text-gray-700 break-words whitespace-pre-wrap" 
                            th:text="${post.sharedPost.content}" 
                            th:if="${!#strings.isEmpty(post.sharedPost.content)}">
                            Original post content
@@ -517,8 +532,8 @@
                     </div>
                     
                     <!-- Original post preview -->
-                    <div class="p-4 bg-gray-50 rounded-lg border-l-4 border-brand-400">
-                        <p class="text-sm text-gray-600 mb-2">Sharing:</p>
+                    <div class="p-4 border-l-4 rounded-lg bg-gray-50 border-brand-400">
+                        <p class="mb-2 text-sm text-gray-600">Sharing:</p>
                         <div id="sharePostPreview" class="text-gray-800">
                             <!-- Post preview will be inserted here -->
                         </div>

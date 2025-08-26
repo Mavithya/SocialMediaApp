@@ -534,8 +534,8 @@
     // Update preview
     sharePostPreview.innerHTML = `
       <div class="flex items-start gap-2">
-        <div class="w-8 h-8 rounded-full overflow-hidden">
-          <img src="${getDefaultAvatar(postAuthor)}" alt="Profile" class="w-full h-full object-cover"/>
+        <div class="w-8 h-8 overflow-hidden rounded-full">
+          <img src="${getDefaultAvatar(postAuthor)}" alt="Profile" class="object-cover w-full h-full"/>
         </div>
         <div class="flex-1">
           <p class="text-sm font-medium text-gray-900">${postAuthor}</p>
@@ -962,7 +962,7 @@ function createCommentElement(comment) {
 
     div.innerHTML = `
       <div class="avatar">
-        <div class="w-8 h-8 rounded-full overflow-hidden">
+        <div class="w-8 h-8 overflow-hidden rounded-full">
           ${avatarHTML}
         </div>
       </div>
@@ -1942,7 +1942,7 @@ function getCurrentUserEmail() {
           <svg class="w-4 h-4 mr-2 text-brand-600" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
           </svg>
-          <span class="text-sm font-medium text-brand-700">${locationName}</span>
+          <span class="text-sm font-medium text-gray-500">${locationName}</span>
           <button type="button" onclick="removeLocationFromPost()" class="p-1 ml-auto text-gray-400 transition-colors rounded-full hover:text-red-500">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
