@@ -79,7 +79,7 @@
                             <div class="flex-shrink-0">
                                 <div th:if="${user.profilePicture != null and !#strings.isEmpty(user.profilePicture)}"
                                      class="w-12 h-12 overflow-hidden rounded-full">
-                                    <img th:src="@{'/uploads/profiles/' + ${user.profilePicture}}" 
+                                    <img th:src="${user.profilePicture}" 
                                          th:alt="${user.firstName + ' ' + user.lastName}" 
                                          class="object-cover w-full h-full">
                                 </div>
@@ -129,7 +129,7 @@
                             <div class="flex-shrink-0">
                                 <div th:if="${post.user.profilePicture != null and !#strings.isEmpty(post.user.profilePicture)}"
                                      class="w-10 h-10 overflow-hidden rounded-full">
-                                    <img th:src="@{'/uploads/profiles/' + ${post.user.profilePicture}}" 
+                                    <img th:src="${post.user.profilePicture}" 
                                          th:alt="${post.user.firstName + ' ' + post.user.lastName}" 
                                          class="object-cover w-full h-full">
                                 </div>
