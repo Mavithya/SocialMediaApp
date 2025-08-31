@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build:css": "postcss src/main/resources/static/css/tailwind-input.css -o src/main/resources/static/css/main.css",
+    "build:css": "node init && postcss src/main/resources/static/css/tailwind-input.css -o src/main/resources/static/css/main.css",
     "watch:css": "npm run build:css -- --watch"
   },
   "repository": {
