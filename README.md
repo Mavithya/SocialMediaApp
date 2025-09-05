@@ -59,7 +59,7 @@ Make sure you have the following installed:
 
 ## 📸 Demo
 
-👉 [Watch the demo video here](https://your-demo-video-link.com](https://drive.google.com/drive/folders/1z_WefvMz_K7WpUqVG3WmDsAyJNb9Eic4?usp=share_link)
+👉 Watch the demo video here: [https://drive.google.com/drive/folders/1z_WefvMz_K7WpUqVG3WmDsAyJNb9Eic4?usp=share_link]
 
    
   
