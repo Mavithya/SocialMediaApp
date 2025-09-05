@@ -74,19 +74,19 @@
 
 <div th:replace="~{components/navbar :: navbar}"></div>
 
-<div class="flex flex-col justify-between min-h-screen mt-6 lg:flex-row">
+<div class="flex flex-col justify-between min-h-screen gap-4 mt-6 lg:flex-row">
 
-  <aside class="hidden lg:block ml-10 sticky top-20 self-start h-[calc(100vh-5rem)] overflow-y-auto">
+  <aside class="hidden lg:block ml-6 sticky top-20 self-start h-[calc(100vh-5rem)] overflow-y-auto">
     <div th:replace="~{components/profile-sidebar :: profileSidebar}"></div>
   </aside>
 
   <!-- Main Feed -->
-  <main class="flex-1 max-w-2xl px-6 mx-auto">
+  <main class="flex-1 max-w-3xl px-4 mx-auto">
     <div th:replace="~{components/feed :: feed}"></div>
   </main>
 
   <!-- Right Sidebar (Desktop only) -->
-  <aside class="hidden lg:block mr-10 sticky top-20 self-start h-[calc(100vh-5rem)] overflow-y-auto">
+  <aside class="hidden lg:block mr-6 sticky top-20 self-start h-[calc(100vh-5rem)] overflow-y-auto">
     <div th:replace="~{components/right-sidebar :: rightSidebar}"></div>
   </aside>
 </div>
@@ -98,6 +98,92 @@
   // CSRF setup for AJAX
   const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
   const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+  // Time utility functions for Facebook-style formatting
+  function getTimeAgo(dateTimeString) {
+    if (!dateTimeString) return '';
+    
+    const now = new Date();
+    const time = new Date(dateTimeString);
+    const diffInSeconds = Math.floor((now - time) / 1000);
+    
+    if (diffInSeconds < 60) {
+      return 'now';
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return minutes + 'm';
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return hours + 'h';
+    } else if (diffInSeconds < 604800) { // 7 days
+      const days = Math.floor(diffInSeconds / 86400);
+      return days + 'd';
+    } else {
+      // For posts older than a week, show the date
+      return time.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: time.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+      }) + ' at ' + time.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    }
+  }
+
+  function getVerboseTimeAgo(dateTimeString) {
+    if (!dateTimeString) return '';
+    
+    const now = new Date();
+    const time = new Date(dateTimeString);
+    const diffInSeconds = Math.floor((now - time) / 1000);
+    
+    if (diffInSeconds < 60) {
+      return 'Just now';
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return minutes === 1 ? '1 minute ago' : minutes + ' minutes ago';
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return hours === 1 ? '1 hour ago' : hours + ' hours ago';
+    } else if (diffInSeconds < 604800) { // 7 days
+      const days = Math.floor(diffInSeconds / 86400);
+      return days === 1 ? '1 day ago' : days + ' days ago';
+    } else {
+      // For posts older than a week, show the date
+      return time.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      }) + ' at ' + time.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    }
+  }
+
+  // Function to get default avatar image with user's initial
+  function getDefaultAvatar(fullName = '') {
+    // Extract first letter of the name, default to 'U' if no name provided
+    const initial = fullName.trim() ? fullName.charAt(0).toUpperCase() : 'U';
+    
+    // Generate a consistent color based on the initial
+    const colors = [
+      '#468be5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
+      '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1'
+    ];
+    const colorIndex = initial.charCodeAt(0) % colors.length;
+    const backgroundColor = colors[colorIndex];
+    
+    return 'data:image/svg+xml;base64,' + btoa(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150">
+        <circle cx="75" cy="75" r="75" fill="${backgroundColor}"/>
+        <text x="75" y="75" text-anchor="middle" dominant-baseline="central" fill="white" font-family="Arial, sans-serif" font-size="60" font-weight="bold">${initial}</text>
+      </svg>
+    `);
+  }
 
   // Auto-hide flash messages
   document.addEventListener('DOMContentLoaded', function() {
@@ -114,63 +200,27 @@
   });
 
   document.addEventListener('DOMContentLoaded', function() {
-    // Character counter for post textarea
+    // Post form handling
     const textarea = document.querySelector('textarea[name="content"]');
-    const charCounter = document.getElementById("charCounter");
     const postForm = document.querySelector('form[action*="/posts"]');
     const postButton = document.querySelector('form[action*="/posts"] button[type="submit"]');
     
-    if (textarea && charCounter) {
-      // Set initial button state
-      if (postButton) {
-        postButton.disabled = true;
-        postButton.classList.add('opacity-50', 'cursor-not-allowed');
-        postButton.title = 'Please write something before posting.';
-      }
-      
-      textarea.addEventListener('input', function() {
-        const count = this.value.length;
-        charCounter.textContent = count + '/280 Characters';
-        
-        // Update submit button state
-        if (postButton) {
-          if (count > 280) {
-            charCounter.classList.add('text-red-400');
-            charCounter.classList.remove('text-gray-700');
-            postButton.disabled = true;
-            postButton.classList.add('opacity-50', 'cursor-not-allowed');
-            postButton.title = 'Post is too long. Please reduce to 280 characters or less.';
-          } else if (count === 0) {
-            charCounter.classList.add('text-gray-700');
-            charCounter.classList.remove('text-red-400');
-            postButton.disabled = true;
-            postButton.classList.add('opacity-50', 'cursor-not-allowed');
-            postButton.title = 'Please write something before posting.';
-          } else {
-            charCounter.classList.add('text-gray-700');
-            charCounter.classList.remove('text-red-400');
-            postButton.disabled = false;
-            postButton.classList.remove('opacity-50', 'cursor-not-allowed');
-            postButton.title = '';
-          }
-        }
-      });
+    if (postButton) {
+      // Remove initial disabled state - allow posting without text if media is attached
+      postButton.disabled = false;
+      postButton.classList.remove('opacity-50', 'cursor-not-allowed');
     }
     
     // Add form submission validation
     if (postForm) {
       postForm.addEventListener('submit', function(e) {
         const content = textarea ? textarea.value.trim() : '';
+        const mediaFiles = document.getElementById('mediaUpload').files;
         
-        if (content === '') {
+        // Allow submission if there's either content or media files
+        if (content === '' && mediaFiles.length === 0) {
           e.preventDefault();
-          showNotification('Post content cannot be empty. Please write something before posting.', 'error');
-          return false;
-        }
-        
-        if (content.length > 280) {
-          e.preventDefault();
-          showNotification('Post content is too long. Please keep it under 280 characters.', 'error');
+          showNotification('Please add some content or attach media before posting.', 'error');
           return false;
         }
         
@@ -195,19 +245,41 @@
       const postId = post.dataset.postId;
       const likeButton = post.querySelector('.like-button');
       const commentButton = post.querySelector('.comment-button');
+      const shareButton = post.querySelector('.share-button');
       const deleteButton = post.querySelector('.delete-post-button');
 
       // Initialize like count and status
       fetchLikeStatus(postId, likeButton);
       
+      // Initialize share count and status
+      fetchShareStatus(postId, shareButton);
+      
       likeButton.addEventListener('click', () => toggleLike(postId, likeButton));
       
       commentButton.addEventListener('click', () => openCommentModal(postId));
+
+      shareButton.addEventListener('click', () => openShareModal(postId));
 
       if (deleteButton) {
         deleteButton.addEventListener('click', () => deletePost(postId));
       }
     });
+    
+    // Profile picture click handler
+    const profilePicture = document.getElementById('profile-picture-img');
+    const profileLink = document.getElementById('profile-link');
+    
+    if (profilePicture && profileLink) {
+      profilePicture.addEventListener('click', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const imageSrc = this.getAttribute('data-image-src');
+        if (imageSrc) {
+          openImageModal(imageSrc);
+        }
+      });
+    }
     
     document.getElementById('closeCommentModal').addEventListener('click', closeCommentModal);
     
@@ -219,37 +291,35 @@
       }
     });
 
-    // Delete modal event listeners
-    const deleteModal = document.getElementById('deletePostModal');
-    if (deleteModal) {
-      deleteModal.addEventListener('click', function(e) {
-        // Only close if clicking on the backdrop (not the modal content)
-        if (e.target === deleteModal || e.target.classList.contains('bg-black')) {
-          closeDeletePostModal();
-        }
-      });
-    }
+    // Add event listeners for share modal
+    document.getElementById('closeShareModal').addEventListener('click', closeShareModal);
+    
+    document.getElementById('shareModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeShareModal();
+      }
+    });
 
-    // Delete comment modal event listeners
-    const deleteCommentModal = document.getElementById('deleteCommentModal');
-    if (deleteCommentModal) {
-      deleteCommentModal.addEventListener('click', function(e) {
-        // Only close if clicking on the backdrop (not the modal content)
-        if (e.target === deleteCommentModal || e.target.classList.contains('bg-black')) {
-          closeDeleteCommentModal();
-        }
-      });
-    }
+    document.getElementById('shareToFeed').addEventListener('click', function() {
+      const modal = document.getElementById('shareModal');
+      const postId = modal.dataset.postId;
+      if (postId) {
+        shareToFeed(postId);
+      }
+    });
 
-    // Close delete modals on Escape key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        if (!document.getElementById('deletePostModal').classList.contains('hidden')) {
-          closeDeletePostModal();
-        }
-        if (!document.getElementById('deleteCommentModal').classList.contains('hidden')) {
-          closeDeleteCommentModal();
-        }
+    document.getElementById('copyLink').addEventListener('click', function() {
+      const modal = document.getElementById('shareModal');
+      const postId = modal.dataset.postId;
+      if (postId) {
+        copyPostLink(postId);
+      }
+    });
+
+    // Add event listeners for delete modals
+    document.getElementById('deletePostModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeDeletePostModal();
       }
     });
   }
@@ -327,6 +397,281 @@
     }
   }
 
+  // Share functionality
+  // Function to fetch and update share status
+  function fetchShareStatus(postId, shareButton) {
+    const currentUser = getCurrentUserEmail();
+    if (!currentUser) {
+      console.error('No current user found for share status check');
+      return;
+    }
+
+    fetch(`/api/shares/${postId}/status`, {
+      method: 'GET',
+      headers: {
+        [csrfHeader]: csrfToken,
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log(`Fetching share status for post ${postId}: user=${currentUser}, shared=${data.shared}, count=${data.shareCount}`);
+        updateShareButton(shareButton, data.shared, data.shareCount);
+      })
+      .catch(error => {
+        console.error('Error fetching share status:', error);
+        // Set default state on error
+        updateShareButton(shareButton, false, 0);
+      });
+  }
+
+  // Function to toggle share
+  function toggleShare(postId, shareButton) {
+    fetch(`/api/shares/${postId}`, {
+      method: 'POST',
+      headers: {
+        [csrfHeader]: csrfToken
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        updateShareButton(shareButton, data.shared, data.shareCount);
+        
+        // Show notification
+        if (data.shared) {
+          showNotification('Post shared successfully!', 'success');
+        } else {
+          showNotification('Share removed', 'success');
+        }
+      })
+      .catch(error => {
+        console.error('Error toggling share:', error);
+        showNotification('Failed to share post', 'error');
+      });
+  }
+
+  // Function to update share button appearance
+  function updateShareButton(button, isShared, shareCount) {
+    const countSpan = button.querySelector('.share-count');
+    const buttonText = button.querySelector('.share-text') || button.childNodes[button.childNodes.length - 2];
+    
+    countSpan.textContent = shareCount;
+    
+    const postId = button.closest('.post-card').dataset.postId;
+    console.log(`Post ${postId}: isShared=${isShared}, shareCount=${shareCount}`);
+
+    // Update the share icon and color
+    const svg = button.querySelector('svg');
+    
+    if (isShared) {
+      button.classList.add('text-blue-500');
+      button.classList.remove('text-gray-700');
+      svg.setAttribute('fill', 'currentColor');
+      svg.setAttribute('stroke', 'none');
+      
+      // Add unshare option
+      button.setAttribute('data-shared', 'true');
+    } else {
+      button.classList.remove('text-blue-500');
+      button.classList.add('text-gray-700');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', 'currentColor');
+      
+      // Remove unshare option
+      button.removeAttribute('data-shared');
+    }
+  }
+
+  // Share Modal Functions
+  function openShareModal(postId) {
+    const modal = document.getElementById('shareModal');
+    const sharePostPreview = document.getElementById('sharePostPreview');
+    const shareButton = document.querySelector(`[data-post-id="${postId}"] .share-button`);
+    const shareToFeedBtn = document.getElementById('shareToFeed');
+    
+    // Store the current post ID
+    modal.dataset.postId = postId;
+    
+    // Check if already shared
+    const isAlreadyShared = shareButton.getAttribute('data-shared') === 'true';
+    
+    if (isAlreadyShared) {
+      // Show unshare option
+      shareToFeedBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18"></path>
+          <path d="M19 6v14c0 1-1 2-2 2H7c0-1-1-2-2-2V6"></path>
+          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+        </svg>
+        Remove Share
+      `;
+      shareToFeedBtn.classList.remove('bg-brand-500', 'hover:bg-brand-600');
+      shareToFeedBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+    } else {
+      // Show share option
+      shareToFeedBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+          <path d="M16 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+          <path d="M8 7l8 5l-8 5z" />
+        </svg>
+        Share Post
+      `;
+      shareToFeedBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+      shareToFeedBtn.classList.add('bg-brand-500', 'hover:bg-brand-600');
+    }
+    
+    // Get post data for preview
+    const postCard = document.querySelector(`[data-post-id="${postId}"]`);
+    const postContent = postCard.querySelector('.post-content-scroll p')?.textContent || 'Shared a post';
+    const postAuthor = postCard.querySelector('.font-medium').textContent;
+    
+    // Update preview
+    sharePostPreview.innerHTML = `
+      <div class="flex items-start gap-2">
+        <div class="w-8 h-8 overflow-hidden rounded-full">
+          <img src="${getDefaultAvatar(postAuthor)}" alt="Profile" class="object-cover w-full h-full"/>
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-900">${postAuthor}</p>
+          <p class="text-sm text-gray-600 line-clamp-2">${postContent.substring(0, 100)}${postContent.length > 100 ? '...' : ''}</p>
+        </div>
+      </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+  
+  function closeShareModal() {
+    const modal = document.getElementById('shareModal');
+    const shareTextArea = document.getElementById('shareTextArea');
+    
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    shareTextArea.value = ''; // Clear the text area
+    delete modal.dataset.postId;
+  }
+  
+  function shareToFeed(postId) {
+    const shareButton = document.querySelector(`[data-post-id="${postId}"] .share-button`);
+    const shareText = document.getElementById('shareTextArea').value.trim();
+    const isAlreadyShared = shareButton.getAttribute('data-shared') === 'true';
+    
+    // Show loading state
+    const shareBtn = document.getElementById('shareToFeed');
+    const originalText = shareBtn.innerHTML;
+    shareBtn.disabled = true;
+    shareBtn.innerHTML = '<span class="loading loading-spinner loading-xs"></span> Processing...';
+    
+    if (isAlreadyShared) {
+      // Unshare the post
+      fetch(`/api/shares/${postId}`, {
+        method: 'DELETE',
+        headers: {
+          [csrfHeader]: csrfToken
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          updateShareButton(shareButton, false, data.shareCount);
+          closeShareModal();
+          showNotification(data.message || 'Share removed successfully!', 'success');
+          
+          // Refresh the page to remove shared post from feed
+          setTimeout(() => {
+            location.reload();
+          }, 1000);
+        })
+        .catch(error => {
+          console.error('Error unsharing post:', error);
+          showNotification('Failed to remove share', 'error');
+        })
+        .finally(() => {
+          shareBtn.disabled = false;
+          shareBtn.innerHTML = originalText;
+          closeShareModal();
+        });
+    } else {
+      // Share the post
+      fetch(`/api/shares/${postId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [csrfHeader]: csrfToken
+        },
+        body: JSON.stringify({
+          shareText: shareText
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.shared) {
+            updateShareButton(shareButton, true, data.shareCount);
+            closeShareModal();
+            showNotification(data.message || 'Post shared to your feed!', 'success');
+            
+            // Refresh the page to show the new shared post
+            setTimeout(() => {
+              location.reload();
+            }, 1000);
+          } else {
+            showNotification(data.error || 'Failed to share post', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('Error sharing post:', error);
+          showNotification('Failed to share post', 'error');
+        })
+        .finally(() => {
+          shareBtn.disabled = false;
+          shareBtn.innerHTML = originalText;
+          closeShareModal();
+        });
+    }
+  }
+  
+  function copyPostLink(postId) {
+    const postUrl = `${window.location.origin}/posts/${postId}`;
+    
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(postUrl).then(() => {
+        showNotification('Link copied to clipboard!', 'success');
+        closeShareModal();
+      }).catch(() => {
+        fallbackCopyText(postUrl);
+      });
+    } else {
+      fallbackCopyText(postUrl);
+    }
+  }
+  
+  function fallbackCopyText(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      document.execCommand('copy');
+      showNotification('Link copied to clipboard!', 'success');
+      closeShareModal();
+    } catch (err) {
+      showNotification('Failed to copy link', 'error');
+    }
+    
+    document.body.removeChild(textArea);
+  }
+
   // Function to open comment modal
   function openCommentModal(postId) {
     const modal = document.getElementById('commentModal');
@@ -334,33 +679,198 @@
     modal.classList.remove('hidden');
     document.body.classList.add('overflow-hidden');
     
-    // Fetch post details - FIX: Use correct CSS selectors for light theme
+    // Fetch post details - Fixed CSS selectors for light theme
     const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
-    const authorName = postCard.querySelector('h3').textContent;
-    const postTime = postCard.querySelector('.text-sm.text-gray-400').textContent;
-    const postContent = postCard.querySelector('p.text-gray-700').textContent; // Changed from text-gray-300 to text-gray-700
+    
+    if (postCard) {
+      // Get author name - updated selector
+      const authorNameElement = postCard.querySelector('h3.font-semibold.text-black');
+      const authorName = authorNameElement ? authorNameElement.textContent : 'Unknown Author';
+      
+      // Get post time - updated selector  
+      const postTimeElement = postCard.querySelector('span.text-sm.text-gray-500');
+      const postTime = postTimeElement ? postTimeElement.textContent : '';
+      
+      // Get post content - updated selector
+      const postContentElement = postCard.querySelector('p.text-gray-700.break-words.whitespace-pre-wrap');
+      const postContent = postContentElement ? postContentElement.textContent : '';
 
-    // Update modal content
-    document.getElementById('modalPostAuthor').textContent = authorName;
-    document.getElementById('modalPostTime').textContent = postTime;
-    document.getElementById('modalPostText').textContent = postContent;
-    
-    // Update modal avatar with post author's profile picture
-    const modalAvatarContainer = document.querySelector('#modalPostContent .avatar > div');
-    const postAvatar = postCard.querySelector('.avatar img');
-    
-    if (postAvatar) {
+      // Update modal content
+      document.getElementById('modalPostAuthor').textContent = authorName;
+      document.getElementById('modalPostTime').textContent = postTime;
+      document.getElementById('modalPostText').textContent = postContent;
+
+      // Update modal avatar with post author's profile picture
+      const modalAvatarContainer = document.querySelector('#modalPostContent .avatar > div');
+      const postAvatar = postCard.querySelector('.avatar img');
+      
+      if (postAvatar && modalAvatarContainer) {
         // Post author has a profile picture
         modalAvatarContainer.innerHTML = `<img src="${postAvatar.src}" alt="Profile" class="object-cover w-full h-full rounded-full"/>`;
-    } else {
-        // Use default avatar
-        modalAvatarContainer.innerHTML = `<svg class="mt-2 ml-[10px] w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-        </svg>`;
+      } else if (modalAvatarContainer) {
+        // Use default avatar with author's initial
+        modalAvatarContainer.innerHTML = `<img src="${getDefaultAvatar(authorName)}" alt="Profile" class="object-cover w-full h-full rounded-full"/>`;
+      }
+
+      // Handle media attachments
+      const modalPostMedia = document.getElementById('modalPostMedia');
+      const postMediaContainer = postCard.querySelector('div:has(> div[th\\:if])'); // Find media container in post
+      
+      // Clear previous media content
+      modalPostMedia.innerHTML = '';
+      modalPostMedia.classList.add('hidden');
+      
+      // Check if post has media attachments by looking for images or videos in the post
+      const postImages = postCard.querySelectorAll('img[onclick*="openImageModal"]');
+      const postVideos = postCard.querySelectorAll('video');
+      
+      if (postImages.length > 0 || postVideos.length > 0) {
+        modalPostMedia.classList.remove('hidden');
+        
+        // Create media container based on number of media items
+        const totalMedia = postImages.length + postVideos.length;
+        
+        if (totalMedia === 1) {
+          // Single media item
+          modalPostMedia.className = 'mt-3 relative';
+          
+          if (postImages.length > 0) {
+            const img = postImages[0];
+            modalPostMedia.innerHTML = `
+              <img src="${img.src}" alt="${img.alt || 'Post image'}" 
+                   class="object-cover w-full border border-gray-200 rounded-lg cursor-pointer max-h-64"
+                   onclick="openImageModal('${img.src}')"/>
+            `;
+          } else if (postVideos.length > 0) {
+            const video = postVideos[0];
+            const source = video.querySelector('source');
+            modalPostMedia.innerHTML = `
+              <video controls class="w-full border border-gray-200 rounded-lg max-h-64">
+                <source src="${source.src}" type="${source.type}"/>
+                Your browser does not support the video tag.
+              </video>
+            `;
+          }
+        } else if (totalMedia === 2) {
+          // Two media items
+          modalPostMedia.className = 'mt-3 grid grid-cols-2 gap-2';
+          let mediaHtml = '';
+          
+          // Add images
+          postImages.forEach(img => {
+            mediaHtml += `
+              <div class="relative">
+                <img src="${img.src}" alt="${img.alt || 'Post image'}" 
+                     class="object-cover w-full h-32 border border-gray-200 rounded-lg cursor-pointer"
+                     onclick="openImageModal('${img.src}')"/>
+              </div>
+            `;
+          });
+          
+          // Add videos
+          postVideos.forEach(video => {
+            const source = video.querySelector('source');
+            mediaHtml += `
+              <div class="relative">
+                <video controls class="w-full h-32 border border-gray-200 rounded-lg">
+                  <source src="${source.src}" type="${source.type}"/>
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            `;
+          });
+          
+          modalPostMedia.innerHTML = mediaHtml;
+        } else {
+          // Three or more media items - show first two with "+X more" overlay
+          modalPostMedia.className = 'mt-3 grid grid-cols-2 gap-2';
+          let mediaHtml = '';
+          let mediaCount = 0;
+          
+          // Add first image if exists
+          if (postImages.length > 0 && mediaCount < 2) {
+            const img = postImages[0];
+            mediaHtml += `
+              <div class="relative">
+                <img src="${img.src}" alt="${img.alt || 'Post image'}" 
+                     class="object-cover w-full h-32 border border-gray-200 rounded-lg cursor-pointer"
+                     onclick="openImageModal('${img.src}')"/>
+              </div>
+            `;
+            mediaCount++;
+          }
+          
+          // Add first video if exists and we need more
+          if (postVideos.length > 0 && mediaCount < 2) {
+            const video = postVideos[0];
+            const source = video.querySelector('source');
+            mediaHtml += `
+              <div class="relative">
+                <video controls class="w-full h-32 border border-gray-200 rounded-lg">
+                  <source src="${source.src}" type="${source.type}"/>
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            `;
+            mediaCount++;
+          }
+          
+          // Add second media item with overlay if there are more than 2 total
+          if (mediaCount < 2) {
+            if (postImages.length > 1) {
+              const img = postImages[1];
+              mediaHtml += `
+                <div class="relative">
+                  <img src="${img.src}" alt="${img.alt || 'Post image'}" 
+                       class="object-cover w-full h-32 border border-gray-200 rounded-lg"/>
+                  <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                    <span class="text-lg font-bold text-white">+${totalMedia - 2} more</span>
+                  </div>
+                </div>
+              `;
+            } else if (postVideos.length > 1) {
+              const video = postVideos[1];
+              const source = video.querySelector('source');
+              mediaHtml += `
+                <div class="relative">
+                  <video class="w-full h-32 border border-gray-200 rounded-lg">
+                    <source src="${source.src}" type="${source.type}"/>
+                  </video>
+                  <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                    <span class="text-lg font-bold text-white">+${totalMedia - 2} more</span>
+                  </div>
+                </div>
+              `;
+            }
+          } else if (totalMedia > 2) {
+            // If we already have 2 items, add overlay to the second one
+            const existingSecond = modalPostMedia.lastElementChild;
+            if (existingSecond) {
+              existingSecond.innerHTML += `
+                <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                  <span class="text-lg font-bold text-white">+${totalMedia - 2} more</span>
+                </div>
+              `;
+            }
+          }
+          
+          modalPostMedia.innerHTML = mediaHtml;
+        }
+      }
     }
     
     // Fetch comments IMMEDIATELY when modal opens
     fetchComments(postId);
+    
+    // Add event listener for delete comment modal (nested inside comment modal)
+    const deleteCommentModal = document.getElementById('deleteCommentModal');
+    if (deleteCommentModal) {
+      deleteCommentModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeDeleteCommentModal();
+        }
+      });
+    }
   }
 
   // Function to close comment modal
@@ -369,6 +879,16 @@
     modal.classList.add('hidden');
     document.body.classList.remove('overflow-hidden');
     document.getElementById('commentContent').value = '';
+    
+    // Clear modal post media content
+    const modalPostMedia = document.getElementById('modalPostMedia');
+    if (modalPostMedia) {
+      modalPostMedia.innerHTML = '';
+      modalPostMedia.classList.add('hidden');
+    }
+    
+    // Close delete comment modal if it's open
+    closeDeleteCommentModal();
   }
 
   // Function to fetch comments
@@ -407,18 +927,8 @@ function createCommentElement(comment) {
     const div = document.createElement('div');
     div.className = 'flex items-start gap-3 p-3 bg-gray-100 rounded-lg';
 
-    let formattedDate;
-    try {
-      formattedDate = new Date(comment.createdAt).toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch (e) {
-      formattedDate = 'Unknown date';
-      console.error('Date formatting error:', e);
-    }
+    // Use our new time formatting function
+    const formattedDate = getTimeAgo(comment.createdAt);
     
     // Handle potentially missing user data
     const firstName = comment.user && comment.user.firstName ? comment.user.firstName : 'Unknown';
@@ -430,8 +940,7 @@ function createCommentElement(comment) {
 
     // Determine if current user can delete this comment
     const isCommentOwner = comment.user && comment.user.email === currentUserEmail;
-    const isPostOwner = comment.post && comment.post.user && comment.post.user.email === currentUserEmail;
-    const canDelete = isCommentOwner || isPostOwner;
+    const canDelete = isCommentOwner; // Only comment owner can delete their own comments
 
     const deleteButtonHTML = canDelete ? `
       <button onclick="deleteComment(${comment.id}, ${comment.post.id})"
@@ -446,15 +955,14 @@ function createCommentElement(comment) {
 
     // Create avatar HTML with conditional profile picture
     const profilePicture = comment.user && comment.user.profilePicture && comment.user.profilePicture.trim() !== '';
+    const fullName = `${firstName} ${lastName}`;
     const avatarHTML = profilePicture ? 
       `<img src="${comment.user.profilePicture}" alt="Profile" class="object-cover w-full h-full rounded-full"/>` :
-      `<svg class="w-4 h-4 mt-2 ml-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-       </svg>`;
+      `<img src="${getDefaultAvatar(fullName)}" alt="Profile" class="object-cover w-full h-full rounded-full"/>`;
 
     div.innerHTML = `
       <div class="avatar">
-        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-brand-300">
+        <div class="w-8 h-8 overflow-hidden rounded-full">
           ${avatarHTML}
         </div>
       </div>
@@ -485,39 +993,28 @@ function getCurrentUserEmail() {
     return '';
 }
 
-  // Global variables to store the IDs to be deleted
+  // Variables to store the post/comment to be deleted
   let postToDelete = null;
   let commentToDelete = null;
   let postIdForComment = null;
 
-  // Function to show delete confirmation modal
-  function showDeletePostModal(postId) {
+  // Function to delete a post
+  function deletePost(postId) {
     postToDelete = postId;
-    const modal = document.getElementById('deletePostModal');
-    modal.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
+    document.getElementById('deletePostModal').classList.remove('hidden');
   }
 
-  // Function to close delete confirmation modal
+  // Function to close delete post modal
   function closeDeletePostModal() {
-    const modal = document.getElementById('deletePostModal');
-    modal.classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
+    document.getElementById('deletePostModal').classList.add('hidden');
     postToDelete = null;
   }
 
-  // Function to confirm and execute post deletion
+  // Function to confirm post deletion
   function confirmDeletePost() {
     if (!postToDelete) return;
-    
-    const postId = postToDelete;
-    postToDelete = null;
-    
-    // Close modal first
-    closeDeletePostModal();
-    
-    // Execute the deletion
-    fetch(`/api/posts/${postId}`, {
+
+    fetch(`/api/posts/${postToDelete}`, {
       method: 'DELETE',
       headers: {
         [csrfHeader]: csrfToken
@@ -526,7 +1023,7 @@ function getCurrentUserEmail() {
       .then(response => {
         if (response.ok) {
           // Remove the post from the DOM
-          const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+          const postCard = document.querySelector(`.post-card[data-post-id="${postToDelete}"]`);
           if (postCard) {
             postCard.remove();
           }
@@ -540,41 +1037,31 @@ function getCurrentUserEmail() {
       .catch(error => {
         console.error('Error deleting post:', error);
         showNotification('Error deleting post. Please try again.', 'error');
+      })
+      .finally(() => {
+        closeDeletePostModal();
       });
   }
 
-  // Function to show delete confirmation modal for comments
-  function showDeleteCommentModal(commentId, postId) {
+  // Function to delete a comment
+  function deleteComment(commentId, postId) {
     commentToDelete = commentId;
     postIdForComment = postId;
-    const modal = document.getElementById('deleteCommentModal');
-    modal.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
+    document.getElementById('deleteCommentModal').classList.remove('hidden');
   }
 
-  // Function to close delete comment confirmation modal
+  // Function to close delete comment modal
   function closeDeleteCommentModal() {
-    const modal = document.getElementById('deleteCommentModal');
-    modal.classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
+    document.getElementById('deleteCommentModal').classList.add('hidden');
     commentToDelete = null;
     postIdForComment = null;
   }
 
-  // Function to confirm and execute comment deletion
+  // Function to confirm comment deletion
   function confirmDeleteComment() {
     if (!commentToDelete || !postIdForComment) return;
-    
-    const commentId = commentToDelete;
-    const postId = postIdForComment;
-    commentToDelete = null;
-    postIdForComment = null;
-    
-    // Close modal first
-    closeDeleteCommentModal();
-    
-    // Execute the deletion
-    fetch(`/api/comments/${commentId}`, {
+
+    fetch(`/api/comments/${commentToDelete}`, {
       method: 'DELETE',
       headers: {
         [csrfHeader]: csrfToken
@@ -583,7 +1070,7 @@ function getCurrentUserEmail() {
       .then(response => {
         if (response.ok) {
           // Refresh comments list
-          fetchComments(postId);
+          fetchComments(postIdForComment);
           showNotification('Comment deleted successfully!', 'success');
         } else {
           response.text().then(text => {
@@ -594,17 +1081,10 @@ function getCurrentUserEmail() {
       .catch(error => {
         console.error('Error deleting comment:', error);
         showNotification('Error deleting comment. Please try again.', 'error');
+      })
+      .finally(() => {
+        closeDeleteCommentModal();
       });
-  }
-
-  // Updated deletePost function to use modal
-  function deletePost(postId) {
-    showDeletePostModal(postId);
-  }
-
-  // Function to delete a comment
-  function deleteComment(commentId, postId) {
-    showDeleteCommentModal(commentId, postId);
   }
 
   // Function to show notification
@@ -977,10 +1457,10 @@ function getCurrentUserEmail() {
             showNotification('Friend request sent successfully!', 'success');
             
             // Update button state
-            buttonElement.textContent = 'Requset Sent';
+            buttonElement.textContent = 'Sent';
             buttonElement.disabled = true;
-            buttonElement.classList.remove('!bg-brand-500', '!border-brand-500');
-            buttonElement.classList.add('!bg-brand-400', '!border-gray-400','!text-black');
+            buttonElement.classList.remove('!bg-brand-500', '!border-brand-500', 'hover:scale-105');
+            buttonElement.classList.add('!bg-green-500', '!border-green-500', '!text-white');
             
           } else {
             const errorText = await response.text();
@@ -1002,23 +1482,544 @@ function getCurrentUserEmail() {
     });
   });
 
-  // Notification system for home page
+  // Location Modal Functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const locationButton = document.getElementById('locationButton');
+    const locationModal = document.getElementById('locationModal');
+    const closeLocationModal = document.getElementById('closeLocationModal');
+    const cancelLocationBtn = document.getElementById('cancelLocationBtn');
+    const locationSearch = document.getElementById('locationSearch');
+    const locationResults = document.getElementById('locationResults');
+    const getCurrentLocationBtn = document.getElementById('getCurrentLocation');
+    const selectedLocationContainer = document.getElementById('selectedLocationContainer');
+    const selectedLocationText = document.getElementById('selectedLocationText');
+    const removeSelectedLocation = document.getElementById('removeSelectedLocation');
+    const addLocationBtn = document.getElementById('addLocationBtn');
+    const postLocation = document.getElementById('postLocation');
+    
+    let selectedLocation = null;
+    let searchTimeout;
+    
+    // Sample locations for demo (replace with real API call in production)
+    const popularLocations = [
+      // Sri Lankan locations
+      { name: "Ambalangoda, Sri Lanka", lat: 6.2359, lng: 80.0543, type: "city" },
+      { name: "Colombo, Sri Lanka", lat: 6.9271, lng: 79.8612, type: "city" },
+      { name: "Galle, Sri Lanka", lat: 6.0329, lng: 80.2168, type: "city" },
+      { name: "Kandy, Sri Lanka", lat: 7.2906, lng: 80.6337, type: "city" },
+      { name: "Demodara, Sri Lanka", lat: 7.2083, lng: 79.8358, type: "city" },
+      { name: "Mirissa, Sri Lanka", lat: 5.9485, lng: 80.5353, type: "city" },
+      { name: "Jaffna, Sri Lanka", lat: 9.6615, lng: 80.0255, type: "city" },
+      { name: "Nuwara Eliya, Sri Lanka", lat: 7.7102, lng: 81.6924, type: "city" },
+      // International locations
+      { name: "New York, NY, USA", lat: 40.7128, lng: -74.0060, type: "city" },
+      { name: "Los Angeles, CA, USA", lat: 34.0522, lng: -118.2437, type: "city" },
+      { name: "London, UK", lat: 51.5074, lng: -0.1278, type: "city" },
+      { name: "Paris, France", lat: 48.8566, lng: 2.3522, type: "city" },
+      { name: "Tokyo, Japan", lat: 35.6762, lng: 139.6503, type: "city" },
+      { name: "Sydney, Australia", lat: -33.8688, lng: 151.2093, type: "city" },
+      { name: "Mumbai, India", lat: 19.0760, lng: 72.8777, type: "city" },
+      { name: "Dubai, UAE", lat: 25.2048, lng: 55.2708, type: "city" }
+    ];
+    
+    // Open location modal
+    if (locationButton) {
+      locationButton.addEventListener('click', function() {
+        openLocationModal();
+        showPopularLocations();
+      });
+    }
+    
+    // Close modal functions
+    function closeLocationModalFunc() {
+      if (locationModal) {
+        locationModal.classList.add('hidden');
+        locationModal.classList.remove('flex');
+        document.body.classList.remove('overflow-hidden');
+        // Reset modal state
+        if (locationResults) locationResults.innerHTML = '';
+        if (locationSearch) locationSearch.value = '';
+        // Keep selected location visible if one is selected
+        if (!postLocation || !postLocation.value) {
+          if (selectedLocationContainer) {
+            selectedLocationContainer.classList.add('hidden');
+            selectedLocationContainer.classList.remove('flex');
+          }
+        }
+      }
+    }
+    
+    if (closeLocationModal) {
+      closeLocationModal.addEventListener('click', closeLocationModalFunc);
+    }
+    if (cancelLocationBtn) {
+      cancelLocationBtn.addEventListener('click', closeLocationModalFunc);
+    }
+    
+    // Close when clicking outside the modal content
+    if (locationModal) {
+      locationModal.addEventListener('click', function(e) {
+        if (e.target === locationModal) {
+          closeLocationModalFunc();
+        }
+      });
+    }
+    
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && locationModal && !locationModal.classList.contains('hidden')) {
+        closeLocationModalFunc();
+      }
+    });
+    
+    // Open modal function
+    function openLocationModal() {
+      if (locationModal) {
+        locationModal.classList.remove('hidden');
+        locationModal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+        
+        // If location is already selected, show it
+        if (postLocation && postLocation.value) {
+          try {
+            const locationData = JSON.parse(postLocation.value);
+            if (selectedLocationText) selectedLocationText.textContent = locationData.name;
+            if (selectedLocationContainer) {
+              selectedLocationContainer.classList.remove('hidden');
+              selectedLocationContainer.classList.add('flex');
+            }
+          } catch (e) {
+            console.error('Error parsing location data:', e);
+            if (selectedLocationContainer) {
+              selectedLocationContainer.classList.add('hidden');
+              selectedLocationContainer.classList.remove('flex');
+            }
+          }
+        } else {
+          if (selectedLocationContainer) {
+            selectedLocationContainer.classList.add('hidden');
+            selectedLocationContainer.classList.remove('flex');
+          }
+        }
+      }
+    }
+    
+    // Get current location
+    if (getCurrentLocationBtn) {
+      getCurrentLocationBtn.addEventListener('click', function() {
+        // Show loading state
+        const originalContent = getCurrentLocationBtn.innerHTML;
+        getCurrentLocationBtn.innerHTML = `
+          <div class="flex items-center justify-center w-12 h-12 mr-4 transition-colors rounded-full bg-brand-100 text-brand-600">
+            <div class="w-6 h-6 border-2 border-t-2 rounded-full border-brand-600 animate-spin"></div>
+          </div>
+          <div>
+            <p class="font-medium text-gray-800">Getting your location...</p>
+            <p class="text-sm text-gray-600">Please wait</p>
+          </div>
+        `;
+        getCurrentLocationBtn.disabled = true;
+        
+        if (navigator.geolocation) {
+          // Configure geolocation options for better accuracy and user experience
+          const options = {
+            enableHighAccuracy: true,  // Request high accuracy
+            timeout: 10000,            // 10 second timeout
+            maximumAge: 300000         // Accept cached location up to 5 minutes old
+          };
+          
+          navigator.geolocation.getCurrentPosition(
+            function(position) {
+              const lat = position.coords.latitude;
+              const lng = position.coords.longitude;
+              console.log('✅ Location detected:', lat, lng);
+              
+              // Simulate reverse geocoding (replace with real API in production)
+              reverseGeocode(lat, lng);
+            },
+            function(error) {
+              // Reset button
+              getCurrentLocationBtn.innerHTML = originalContent;
+              getCurrentLocationBtn.disabled = false;
+              
+              // Show detailed error notification with helpful instructions
+              let errorMessage = "Unable to get your location. ";
+              let helpText = "";
+              
+              switch(error.code) {
+                case error.PERMISSION_DENIED:
+                  errorMessage = "Location access denied. ";
+                  helpText = "Please click the location icon in your browser's address bar and allow location access, then try again.";
+                  break;
+                case error.POSITION_UNAVAILABLE:
+                  errorMessage = "Location information is unavailable. ";
+                  helpText = "Please check your internet connection and try again. Make sure location services are enabled on your device.";
+                  break;
+                case error.TIMEOUT:
+                  errorMessage = "Location request timed out. ";
+                  helpText = "The request took too long. Please try again or check your connection.";
+                  break;
+                default:
+                  errorMessage = "Location error occurred. ";
+                  helpText = "Please try again or select a location manually.";
+                  break;
+              }
+              
+              // Show both error message and help text
+              showNotification(errorMessage + helpText, 'error');
+              console.error('❌ Geolocation error:', error);
+            },
+            options  // Pass the options object
+          );
+        } else {
+          getCurrentLocationBtn.innerHTML = originalContent;
+          getCurrentLocationBtn.disabled = false;
+          showNotification("Geolocation is not supported by this browser. Please select a location manually or update your browser.", 'error');
+        }
+      });
+    }
+    
+    // Simulated reverse geocoding (replace with actual API call in production)
+    function reverseGeocode(lat, lng) {
+      // Simulate API call delay
+      setTimeout(() => {
+        // Generate a realistic location name based on coordinates (simulate location detection)
+        // In production, replace this with actual geocoding API like Google Maps, Mapbox, or OpenStreetMap
+        let locationName;
+        
+        // Simulate different locations based on coordinates range
+        if (lat >= 6.0 && lat <= 10.0 && lng >= 79.0 && lng <= 82.0) {
+          // Sri Lanka region
+          if (lat >= 6.0 && lat <= 6.5 && lng >= 79.8 && lng <= 80.2) {
+            locationName = "Galle, Sri Lanka";
+          } else if (lat >= 6.8 && lat <= 7.2 && lng >= 79.8 && lng <= 80.4) {
+            locationName = "Colombo, Sri Lanka"; 
+          } else if (lat >= 6.5 && lat <= 7.0 && lng >= 79.9 && lng <= 80.5) {
+            locationName = "Ambalangoda, Sri Lanka";
+          } else {
+            locationName = "Sri Lanka";
+          }
+        } else if (lat >= 40.0 && lat <= 41.0 && lng >= -74.5 && lng <= -73.5) {
+          locationName = "New York, NY, USA"; // New York area
+        } else if (lat >= 51.0 && lat <= 52.0 && lng >= -0.5 && lng <= 0.5) {
+          locationName = "London, United Kingdom"; // London area
+        } else if (lat >= 37.0 && lat <= 38.0 && lng >= -122.5 && lng <= -121.5) {
+          locationName = "San Francisco, CA, USA"; // San Francisco area
+        } else if (lat >= 28.5 && lat <= 29.0 && lng >= 77.0 && lng <= 77.5) {
+          locationName = "New Delhi, India"; // Delhi area
+        } else if (lat >= 19.0 && lat <= 19.3 && lng >= 72.7 && lng <= 73.0) {
+          locationName = "Mumbai, Maharashtra, India"; // Mumbai area
+        } else if (lat >= 12.9 && lat <= 13.1 && lng >= 77.5 && lng <= 77.7) {
+          locationName = "Bangalore, Karnataka, India"; // Bangalore area
+        } else {
+          // Default fallback with a generic location name
+          locationName = "Current Location";
+        }
+        
+        // Set as selected location
+        selectedLocation = {
+          name: locationName,
+          lat: lat,
+          lng: lng,
+          current: true,
+          type: "current"
+        };
+        
+        // Update UI
+        if (selectedLocationText) selectedLocationText.textContent = locationName;
+        if (selectedLocationContainer) {
+          selectedLocationContainer.classList.remove('hidden');
+          selectedLocationContainer.classList.add('flex');
+        }
+        
+        // Reset button
+        if (getCurrentLocationBtn) {
+          getCurrentLocationBtn.innerHTML = `
+            <div class="flex items-center justify-center w-12 h-12 mr-4 transition-colors rounded-full bg-brand-100 text-brand-600 group-hover:bg-brand-200">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div>
+              <p class="font-medium text-gray-800">Use current location</p>
+              <p class="text-sm text-gray-600">Share your precise location</p>
+            </div>
+            <div class="ml-auto">
+              <svg class="w-5 h-5 text-gray-400 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          `;
+          getCurrentLocationBtn.disabled = false;
+        }
+        
+        showNotification('Current location detected!', 'success');
+      }, 1500);
+    }
+    
+    // Location search input
+    if (locationSearch) {
+      locationSearch.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        clearTimeout(searchTimeout);
+        
+        if (query.length < 2) {
+          if (query.length === 0) {
+            showPopularLocations();
+          }
+          return;
+        }
+        
+        // Debounce search to avoid too many requests
+        searchTimeout = setTimeout(() => {
+          searchLocations(query);
+        }, 300);
+      });
+    }
+    
+    // Search locations (simulated - replace with actual API call)
+    function searchLocations(query) {
+      if (!locationResults) return;
+      
+      // Show loading
+      locationResults.innerHTML = `
+        <div class="flex items-center justify-center py-8">
+          <div class="w-6 h-6 border-2 border-t-2 rounded-full border-brand-600 animate-spin"></div>
+          <span class="ml-3 text-gray-600">Searching locations...</span>
+        </div>
+      `;
+      
+      // Simulate API call delay
+      setTimeout(() => {
+        // Filter the sample locations based on query
+        const filteredLocations = popularLocations.filter(loc => 
+          loc.name.toLowerCase().includes(query.toLowerCase())
+        );
+        
+        // Generate results
+        if (filteredLocations.length > 0) {
+          renderLocationResults(filteredLocations, `Results for "${query}"`);
+        } else {
+          locationResults.innerHTML = `
+            <div class="py-8 text-center">
+              <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              <p class="font-medium text-gray-500">No locations found</p>
+              <p class="text-sm text-gray-400">Try searching for a different location</p>
+            </div>
+          `;
+        }
+      }, 500);
+    }
+    
+    // Show popular/suggested locations
+    function showPopularLocations() {
+      // Prioritize Sri Lankan locations
+      const sriLankanLocations = popularLocations.filter(loc => loc.name.includes('Sri Lanka'));
+      const otherLocations = popularLocations.filter(loc => !loc.name.includes('Sri Lanka'));
+      const orderedLocations = [...sriLankanLocations, ...otherLocations.slice(0, 6)]; // Show top 6 international
+      
+      renderLocationResults(orderedLocations, 'Popular Locations');
+    }
+    
+    // Render location results
+    function renderLocationResults(locations, title) {
+      if (!locationResults) return;
+      
+      let resultsHtml = `<p class="mb-4 text-sm font-semibold tracking-wide text-gray-500 uppercase">${title}</p>`;
+      
+      locations.forEach(location => {
+        const locationIcon = location.type === 'city' ? 
+          `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+           </svg>` :
+          `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+           </svg>`;
+           
+        resultsHtml += `
+          <div class="flex items-center p-4 mb-2 transition-all border-2 border-gray-200 cursor-pointer location-item rounded-xl hover:border-brand-300 hover:bg-brand-50 group" 
+               data-location='${JSON.stringify(location)}'>
+            <div class="flex-shrink-0 mr-4 text-gray-500 transition-colors group-hover:text-brand-600">
+              ${locationIcon}
+            </div>
+            <div class="flex-1">
+              <p class="font-medium text-gray-800 group-hover:text-brand-700">${location.name}</p>
+              <p class="text-sm text-gray-500">${location.type === 'city' ? 'City' : 'Location'}</p>
+            </div>
+            <div class="ml-auto transition-opacity opacity-0 group-hover:opacity-100">
+              <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+        `;
+      });
+      
+      locationResults.innerHTML = resultsHtml;
+      
+      // Add click event listeners to location items
+      document.querySelectorAll('.location-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const locationData = JSON.parse(this.getAttribute('data-location'));
+          
+          // Set as selected location
+          selectedLocation = locationData;
+          
+          // Update UI
+          if (selectedLocationText) selectedLocationText.textContent = locationData.name;
+          if (selectedLocationContainer) {
+            selectedLocationContainer.classList.remove('hidden');
+            selectedLocationContainer.classList.add('flex');
+          }
+          
+          // Add nice selection feedback
+          this.style.transform = 'scale(0.98)';
+          setTimeout(() => {
+            this.style.transform = 'scale(1)';
+          }, 150);
+        });
+      });
+    }
+    
+    // Remove selected location
+    if (removeSelectedLocation) {
+      removeSelectedLocation.addEventListener('click', function() {
+        selectedLocation = null;
+        if (selectedLocationContainer) {
+          selectedLocationContainer.classList.add('hidden');
+          selectedLocationContainer.classList.remove('flex');
+        }
+        if (selectedLocationText) selectedLocationText.textContent = '';
+        if (postLocation) postLocation.value = '';
+        
+        // Remove form location indicator if it exists
+        const formLocationIndicator = document.getElementById('formLocationIndicator');
+        if (formLocationIndicator) {
+          formLocationIndicator.remove();
+        }
+      });
+    }
+    
+    // Add location to post
+    if (addLocationBtn) {
+      addLocationBtn.addEventListener('click', function() {
+        if (selectedLocation) {
+          // Save location to hidden input
+          if (postLocation) postLocation.value = JSON.stringify(selectedLocation);
+          
+          // Create location indicator in post form
+          updateLocationIndicator(selectedLocation.name);
+          
+          // Close modal
+          closeLocationModalFunc();
+          
+          // Show success notification
+          showNotification('Location added to your post!', 'success');
+        } else {
+          showNotification('Please select a location first', 'error');
+        }
+      });
+    }
+    
+    // Function to update location indicator
+    function updateLocationIndicator(locationName) {
+      // Remove existing indicator
+      const existingIndicator = document.getElementById('formLocationIndicator');
+      if (existingIndicator) {
+        existingIndicator.remove();
+      }
+      
+      // Find the post actions container
+      const postActionsContainer = document.querySelector('.post-actions-container');
+      if (postActionsContainer) {
+        const locationIndicator = document.createElement('div');
+        locationIndicator.id = 'formLocationIndicator';
+        locationIndicator.className = 'flex items-center mt-3 p-3 bg-brand-100 border-2 border-brand-400 rounded-xl shadow-sm';
+        locationIndicator.innerHTML = `
+          <svg class="w-4 h-4 mr-2 text-brand-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-sm font-medium text-gray-500">${locationName}</span>
+          <button type="button" onclick="removeLocationFromPost()" class="p-1 ml-auto text-gray-400 transition-colors rounded-full hover:text-red-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        `;
+        postActionsContainer.appendChild(locationIndicator);
+      }
+    }
+    
+    // Global function to remove location from post
+    window.removeLocationFromPost = function() {
+      const postLocation = document.getElementById('postLocation');
+      if (postLocation) postLocation.value = '';
+      
+      const formLocationIndicator = document.getElementById('formLocationIndicator');
+      if (formLocationIndicator) {
+        formLocationIndicator.remove();
+      }
+      
+      selectedLocation = null;
+      showNotification('Location removed from post', 'info');
+    };
+    
+    // Reset location when form is reset
+    const postForm = document.querySelector('form[action*="/posts"]');
+    if (postForm) {
+      postForm.addEventListener('reset', function() {
+        if (postLocation) postLocation.value = '';
+        const formLocationIndicator = document.getElementById('formLocationIndicator');
+        if (formLocationIndicator) {
+          formLocationIndicator.remove();
+        }
+        selectedLocation = null;
+      });
+    }
+  });
+
+  // Notification system for location
   function showNotification(message, type = 'info') {
     // Create notification element
     const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transition-all duration-300 ${
+    notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transition-all duration-300 max-w-sm ${
       type === 'success' ? 'bg-green-500 text-white' :
       type === 'error' ? 'bg-red-500 text-white' :
       'bg-blue-500 text-white'
     }`;
-    notification.textContent = message;
+    notification.innerHTML = `
+      <div class="flex items-start">
+        <div class="flex-shrink-0 mr-2">
+          ${type === 'success' ? 
+            '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>' :
+            type === 'error' ?
+            '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>' :
+            '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>'
+          }
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium">${message}</p>
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()" class="flex-shrink-0 ml-2 text-white hover:text-gray-200">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+          </svg>
+        </button>
+      </div>
+    `;
     
     document.body.appendChild(notification);
     
-    // Remove notification after 3 seconds
+    // Auto-remove notification after 8 seconds (longer for error messages)
+    const timeout = type === 'error' ? 8000 : 3000;
     setTimeout(() => {
-      notification.remove();
-    }, 3000);
+      if (notification.parentElement) {
+        notification.remove();
+      }
+    }, timeout);
   }
 
   // Emoji Picker Functions
@@ -1093,6 +2094,190 @@ function getCurrentUserEmail() {
       }
     }
   });
+
+  // Media Upload Functionality
+  function handleMediaUpload(input) {
+    const mediaPreview = document.getElementById('mediaPreview');
+    const mediaGrid = document.getElementById('mediaGrid');
+    
+    if (input.files && input.files.length > 0) {
+      // Validate file sizes before processing
+      const maxImageSize = 10 * 1024 * 1024; // 10MB
+      const maxVideoSize = 50 * 1024 * 1024; // 50MB
+      const invalidFiles = [];
+      
+      Array.from(input.files).forEach(file => {
+        const isVideo = file.type.startsWith('video/');
+        const maxSize = isVideo ? maxVideoSize : maxImageSize;
+        const maxSizeStr = isVideo ? '50MB' : '10MB';
+        
+        if (file.size > maxSize) {
+          invalidFiles.push(`${file.name} (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds ${maxSizeStr} limit`);
+        }
+      });
+      
+      if (invalidFiles.length > 0) {
+        showNotification('File size errors:\n' + invalidFiles.join('\n'), 'error');
+        input.value = ''; // Clear the input
+        return;
+      }
+      
+      mediaPreview.classList.remove('hidden');
+      
+      // Clear existing previews
+      mediaGrid.innerHTML = '';
+      
+      Array.from(input.files).forEach((file, index) => {
+        const mediaItem = document.createElement('div');
+        mediaItem.className = 'relative group';
+        
+        if (file.type.startsWith('image/')) {
+          // Handle image files
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            mediaItem.innerHTML = `
+              <img src="${e.target.result}" alt="Preview" class="object-cover w-full h-24 border rounded-lg">
+              <button type="button" onclick="removeMediaItem(${index})" 
+                      class="absolute flex items-center justify-center w-6 h-6 text-white transition-opacity bg-red-500 rounded-full opacity-0 top-1 right-1 group-hover:opacity-100">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+              <div class="absolute px-1 text-xs text-white bg-black bg-opacity-50 rounded bottom-1 left-1">
+                IMG
+              </div>
+            `;
+          };
+          reader.readAsDataURL(file);
+        } else if (file.type.startsWith('video/')) {
+          // Handle video files
+          const videoUrl = URL.createObjectURL(file);
+          mediaItem.innerHTML = `
+            <video class="object-cover w-full h-24 border rounded-lg" muted>
+              <source src="${videoUrl}" type="${file.type}">
+            </video>
+            <button type="button" onclick="removeMediaItem(${index})" 
+                    class="absolute flex items-center justify-center w-6 h-6 text-white transition-opacity bg-red-500 rounded-full opacity-0 top-1 right-1 group-hover:opacity-100">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+            <div class="absolute px-1 text-xs text-white bg-black bg-opacity-50 rounded bottom-1 left-1">
+              VIDEO
+            </div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <svg class="w-8 h-8 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+          `;
+        }
+        
+        mediaGrid.appendChild(mediaItem);
+      });
+    } else {
+      mediaPreview.classList.add('hidden');
+    }
+  }
+
+  function removeMediaItem(index) {
+    const mediaUpload = document.getElementById('mediaUpload');
+    const dt = new DataTransfer();
+    
+    // Add all files except the one to be removed
+    Array.from(mediaUpload.files).forEach((file, i) => {
+      if (i !== index) {
+        dt.items.add(file);
+      }
+    });
+    
+    mediaUpload.files = dt.files;
+    
+    // Refresh the preview
+    handleMediaUpload(mediaUpload);
+  }
+
+  function clearMediaAttachments() {
+    const mediaUpload = document.getElementById('mediaUpload');
+    const mediaPreview = document.getElementById('mediaPreview');
+    
+    mediaUpload.value = '';
+    mediaPreview.classList.add('hidden');
+    
+    // Also clear textarea
+    const textarea = document.querySelector('textarea[name="content"]');
+    if (textarea) {
+      textarea.value = '';
+    }
+  }
+
+  // Clear media button functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const clearMediaButton = document.getElementById('clearMedia');
+    if (clearMediaButton) {
+      clearMediaButton.addEventListener('click', function() {
+        const mediaUpload = document.getElementById('mediaUpload');
+        const mediaPreview = document.getElementById('mediaPreview');
+        
+        mediaUpload.value = '';
+        mediaPreview.classList.add('hidden');
+      });
+    }
+  });
+</script>
+
+<!-- Image Modal JavaScript -->
+<script>
+  // Function to open image in modal
+  function openImageModal(imageSrc) {
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    
+    if (!modal || !modalImage) {
+      console.error('Image modal elements not found');
+      return;
+    }
+    
+    modalImage.src = imageSrc;
+    modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+  }
+
+  // Function to close image modal
+  function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    if (!modal) {
+      console.error('Image modal not found');
+      return;
+    }
+    modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+  }
+
+  // Image modal event listeners
+  document.addEventListener('DOMContentLoaded', function() {
+    const closeButton = document.getElementById('closeImageModal');
+    const modal = document.getElementById('imageModal');
+    
+    if (closeButton) {
+      closeButton.addEventListener('click', closeImageModal);
+    }
+    
+    if (modal) {
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+          closeImageModal();
+        }
+      });
+    }
+    
+    // ESC key to close modal
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeImageModal();
+      }
+    });
+  });
 </script>
 
 <!-- Profile Settings Modal -->
@@ -1160,7 +2345,7 @@ function getCurrentUserEmail() {
             <div class="flex items-start gap-4">
               <div class="flex-1">
                 <input type="file" id="profilePicture" name="profilePicture" accept="image/*" onchange="previewProfileImage(this)"
-                       class="w-full px-3 py-2 text-sm text-gray-700 transition-transform bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-brand-600 file:text-white hover:scale-105 hover:file:bg-brand-700">
+                       class="w-full px-3 py-2 text-sm text-gray-700 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-brand-600 file:text-white hover:file:bg-brand-700">
                 <p class="mt-1 text-xs text-gray-400">JPG, PNG, GIF (max 10MB)</p>
               </div>
               <div id="imagePreview" class="hidden">
@@ -1245,6 +2430,97 @@ function getCurrentUserEmail() {
       </div>
     </div>
   </div>
+</div>
+
+<!-- Location Modal -->
+<div id="locationModal" class="fixed inset-0 z-50 items-center justify-center hidden overflow-auto bg-black bg-opacity-70 backdrop-blur-sm">
+    <div class="w-full max-w-md mx-4 transition-all transform bg-white shadow-2xl rounded-xl">
+        <div class="p-6">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold text-black">Add Location</h3>
+                <button id="closeLocationModal" class="p-1 text-gray-500 transition-colors rounded-full hover:text-black hover:bg-gray-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Location Search Input -->
+            <div class="relative mb-4">
+                <div class="flex items-center p-3 transition-colors border-2 border-gray-200 rounded-xl focus-within:border-brand-500">
+                    <svg class="w-5 h-5 mr-3 text-brand-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                    </svg>
+                    <input type="text" id="locationSearch" placeholder="Search for a location..." 
+                           class="w-full text-gray-700 placeholder-gray-400 bg-transparent border-none outline-none focus:ring-0" />
+                </div>
+            </div>
+
+            <!-- Get Current Location Button -->
+            <button id="getCurrentLocation" class="flex items-center w-full p-4 mb-4 text-left transition-all border-2 border-gray-200 rounded-xl hover:border-brand-300 hover:bg-brand-50 group">
+                <div class="flex items-center justify-center w-12 h-12 mr-4 transition-colors rounded-full bg-brand-100 text-brand-600 group-hover:bg-brand-200">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-800">Use current location</p>
+                    <p class="text-sm text-gray-600">Share your precise location</p>
+                </div>
+                <div class="ml-auto">
+                    <svg class="w-5 h-5 text-gray-400 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </button>
+
+            <!-- Location Results -->
+            <div id="locationResults" class="mt-4 space-y-2 overflow-y-auto max-h-60"></div>
+
+            <!-- Selected Location Display -->
+            <div id="selectedLocationContainer" class="items-center hidden p-4 mt-4 border-2 rounded-xl bg-brand-100 border-brand-400">
+                <div class="flex-shrink-0 mr-3 text-brand-600">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p id="selectedLocationText" class="font-medium text-gray-800"></p>
+                    <p class="text-sm text-gray-600">Selected location</p>
+                </div>
+                <button id="removeSelectedLocation" class="p-1 text-gray-400 transition-colors rounded-full hover:text-red-500 hover:bg-red-50">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex justify-end gap-3 mt-6">
+                <button id="cancelLocationBtn" class="px-6 py-2 text-sm font-medium text-gray-700 transition-all bg-gray-200 rounded-xl hover:bg-gray-300 hover:scale-105">
+                    Cancel
+                </button>
+                <button id="addLocationBtn" class="px-6 py-2 text-sm font-medium text-white transition-all shadow-md rounded-xl bg-brand-600 hover:bg-brand-700 hover:scale-105 shadow-brand-500/50">
+                    Add Location
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal for full-size viewing (Profile Pictures) -->
+<div id="imageModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-90 backdrop-blur-sm">
+    <div class="flex items-center justify-center w-full h-full p-4">
+        <div class="relative max-w-4xl max-h-full">
+            <button id="closeImageModal" class="absolute z-10 p-2 text-white bg-black bg-opacity-50 rounded-full top-2 right-2 hover:bg-opacity-70">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <img id="modalImage" src="" alt="Full size view" class="max-w-full max-h-full rounded-lg">
+        </div>
+    </div>
 </div>
 
 </body>

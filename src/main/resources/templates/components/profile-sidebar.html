@@ -3,19 +3,20 @@
      xmlns:sec="https://www.thymeleaf.org/extras/spring-security6"
      class="hidden lg:block">
 
-    <div class="mr-1 bg-white shadow-xl  rounded-xl card">
-        <div class="card-body">
+    <div class="mr-0 bg-white shadow-xl  rounded-xl card">
+        <div class="card-body px-4">
             <div class="flex flex-col items-center">
 
                 <!-- Avatar + Online Dot -->
                 <div class="relative w-20 h-20">
-                    <a href="/profile.html">
+                    <a href="/profile.html" id="profile-link">
                         <div class="flex items-center justify-center w-full h-full transition-transform rounded-full ring ring-brand-500 ring-offset-white ring-offset-2 bg-brand-500 hover:scale-105" id="profile-avatar-container">
                             <img th:if="${#authentication.principal.profilePicture != null and #authentication.principal.profilePicture != ''}" 
                                  th:src="${#authentication.principal.profilePicture}" 
                                  alt="Profile" 
-                                 class="object-cover w-full h-full rounded-full"
-                                 id="profile-picture-img"/>
+                                 class="object-cover w-full h-full rounded-full cursor-pointer"
+                                 id="profile-picture-img"
+                                 th:data-image-src="${#authentication.principal.profilePicture}"/>
                             <svg th:unless="${#authentication.principal.profilePicture != null and #authentication.principal.profilePicture != ''}" 
                                  class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20"
                                  id="profile-default-icon">
@@ -30,8 +31,7 @@
                 <h2 class="mt-4 text-gray-900 card-title" data-user-name
                     th:text="${#authentication.principal.firstName + ' ' + #authentication.principal.lastName}">Name</h2>
 
-                <p class="text-gray-700" data-user-username
-                   th:text="'@' + ${#authentication.principal.username}">@username</p>
+
 
                 <p class="mt-2 text-sm text-center text-gray-700" data-user-email
                    th:text="${#authentication.principal.email}">email@example.com</p>

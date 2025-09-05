@@ -38,4 +38,7 @@ public interface FriendRequestService {
     
     // Check if friend request exists
     boolean hasPendingRequest(Long senderId, Long receiverId);
+    
+    // Unfriend a user
+    void unfriend(Long userId1, Long userId2);
 }

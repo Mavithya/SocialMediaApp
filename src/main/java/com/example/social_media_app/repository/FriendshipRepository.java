@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     
@@ -25,7 +27,20 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
            nativeQuery = true)
     Page<User> findFriendsByUserId(@Param("userId") Long userId, Pageable pageable);
     
+    // Get all friends for a user as list
+    @Query(value = "SELECT u.* FROM users u " +
+           "JOIN friendships f ON (u.id = f.user1_id AND f.user2_id = :userId) " +
+           "OR (u.id = f.user2_id AND f.user1_id = :userId)",
+           nativeQuery = true)
+    List<User> findAllFriendsByUserId(@Param("userId") Long userId);
+    
     // Count friends for a user
     @Query("SELECT COUNT(f) FROM Friendship f WHERE f.user1.id = :userId OR f.user2.id = :userId")
     long countFriendsByUserId(@Param("userId") Long userId);
+    
+    // Find friendship between two users
+    @Query("SELECT f FROM Friendship f WHERE " +
+           "(f.user1.id = :userId1 AND f.user2.id = :userId2) OR " +
+           "(f.user1.id = :userId2 AND f.user2.id = :userId1)")
+    Friendship findBetweenUsers(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
 }

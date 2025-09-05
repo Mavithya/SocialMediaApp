@@ -24,13 +24,13 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
                 <label class="block mb-1 text-sm font-medium text-gray-700">First Name</label>
-                <input type="text" th:field="*{firstName}" placeholder="John"
+                <input type="text" th:field="*{firstName}" placeholder=""
                        class="w-full px-4 py-2 transition bg-white border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-600">
                 <span th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}" class="text-xs text-red-500"></span>
             </div>
             <div>
                 <label class="block mb-1 text-sm font-medium text-gray-700">Last Name</label>
-                <input type="text" th:field="*{lastName}" placeholder="Doe"
+                <input type="text" th:field="*{lastName}" placeholder=""
                        class="w-full px-4 py-2 transition bg-white border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-600">
                 <span th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" class="text-xs text-red-500"></span>
             </div>

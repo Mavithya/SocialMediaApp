@@ -47,11 +47,11 @@ public class User {
     private String username;
 
     private String city;
-    
+
     private String country;
-    
+
     private String education;
-    
+
     private String workplace;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
@@ -68,6 +68,11 @@ public class User {
     @Builder.Default
     @JsonIgnore
     private List<Like> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
+    @JsonIgnore
+    private List<Share> shares = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

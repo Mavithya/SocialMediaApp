@@ -236,4 +236,23 @@ public class FriendRequestController {
 
         return ResponseEntity.ok(status);
     }
+
+    // Unfriend a user
+    @DeleteMapping("/unfriend/{friendId}")
+    public ResponseEntity<?> unfriend(@PathVariable Long friendId, Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            User user = userService.findByEmail(email);
+
+            if (user == null) {
+                return ResponseEntity.badRequest().body("User not found");
+            }
+
+            friendRequestService.unfriend(user.getId(), friendId);
+            return ResponseEntity.ok("Friend removed successfully");
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

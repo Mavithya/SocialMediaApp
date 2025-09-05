@@ -190,6 +190,38 @@
     </div>
 </div>
 
+<!-- Unfriend Confirmation Modal -->
+<div id="unfriendModal" class="fixed inset-0 z-50 flex items-center justify-center hidden overflow-auto bg-black bg-opacity-50 backdrop-blur-sm">
+    <div class="w-full max-w-md mx-4 bg-white rounded-lg shadow-xl">
+        <div class="p-6">
+            <div class="flex items-center mb-4">
+                <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 bg-red-100 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Remove Friend</h3>
+                </div>
+            </div>
+            <div class="mb-6">
+                <p class="text-sm text-gray-600">
+                    Are you sure you want to remove <span id="unfriendName" class="font-medium text-gray-900"></span> from your friends list? 
+                    
+                </p>
+            </div>
+            <div class="flex space-x-3">
+                <button id="cancelUnfriend" class="flex-1 px-4 py-2 text-gray-700 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button id="confirmUnfriendBtn" class="flex-1 px-4 py-2 text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700">
+                    Remove Friend
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="flex flex-1 overflow-hidden">
     <!-- Left Sidebar -->
     <div class="fixed top-0 left-0 z-20 flex flex-col w-64 h-screen pt-16 bg-white border-r border-gray-200 shadow-lg">
@@ -338,7 +370,7 @@
                         />
 
                     </div>
-                    <button class="w-full px-4 py-2 text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700 md:w-auto">
+                    <button class="w-full px-4 py-2 text-white transition-colors rounded-lg shadow-lg bg-brand-600 hover:bg-brand-700 md:w-auto">
                         Search
                     </button>
                 </div>
@@ -550,15 +582,23 @@
         }
     }
 
-    // Function to get default avatar image
-    function getDefaultAvatar() {
+    // Function to get default avatar image with user's initial
+    function getDefaultAvatar(fullName = '') {
+        // Extract first letter of the name, default to 'U' if no name provided
+        const initial = fullName.trim() ? fullName.charAt(0).toUpperCase() : 'U';
+        
+        // Generate a consistent color based on the initial
+        const colors = [
+            '#468be5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
+            '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1'
+        ];
+        const colorIndex = initial.charCodeAt(0) % colors.length;
+        const backgroundColor = colors[colorIndex];
+        
         return 'data:image/svg+xml;base64,' + btoa(`
             <svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150">
-                <circle cx="75" cy="75" r="75" fill="#468be5"/>
-                <g fill="white">
-                    <circle cx="75" cy="55" r="20"/>
-                    <path d="M75 85 C55 85, 40 100, 40 120 L110 120 C110 100, 95 85, 75 85 Z"/>
-                </g>
+                <circle cx="75" cy="75" r="75" fill="${backgroundColor}"/>
+                <text x="75" y="75" text-anchor="middle" dominant-baseline="central" fill="white" font-family="Arial, sans-serif" font-size="60" font-weight="bold">${initial}</text>
             </svg>
         `);
     }
@@ -592,7 +632,7 @@
         const fullName = `${user.firstName} ${user.lastName}`;
         const profileImage = user.profilePicture && user.profilePicture.trim() !== '' ? 
             user.profilePicture : 
-            getDefaultAvatar();
+            getDefaultAvatar(fullName);
         
         // Format location display
         const locationDisplay = formatLocationDisplay(user.city, user.country);
@@ -607,11 +647,11 @@
                         ${locationDisplay}
                     </div>
                     <div class="flex space-x-3">
-                        <button class="px-4 py-2 text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
+                        <button class="px-4 py-2 text-white transition-colors rounded-lg shadow-lg bg-brand-600 hover:bg-brand-700"
                                 onclick="addFriend(${user.id}, this)">
                             Add Friend
                         </button>
-                        <button class="px-4 py-2 text-gray-700 transition-colors bg-gray-200 rounded-lg hover:bg-gray-300"
+                        <button class="px-4 py-2 text-gray-700 transition-colors bg-gray-200 rounded-lg shadow-lg hover:bg-gray-300"
                                 onclick="viewProfile(${user.id})">
                             View Profile
                         </button>
@@ -763,10 +803,7 @@
         const fullName = `${friend.firstName} ${friend.lastName}`;
         const profileImage = friend.profilePicture && friend.profilePicture.trim() !== '' ?
             friend.profilePicture : 
-            getDefaultAvatar();
-        
-        // Format location display
-        const locationDisplay = formatLocationDisplay(friend.city, friend.country);
+            getDefaultAvatar(fullName);
 
         return `
             <div class="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm friend-card modern-card">
@@ -785,10 +822,15 @@
                         </svg>
                         ${formatLocationText(friend.city, friend.country)}
                     </div>
-                    <div class="flex justify-center">
-                        <button class="w-full px-3 py-2 transition-all duration-200 border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400"
+                    <div class="flex space-x-2">
+                        <button class="flex-1 px-3 py-2 font-medium text-white transition-all duration-200 rounded-lg bg-brand-600 hover:bg-brand-700"
                                 onclick="viewProfile(${friend.id})">
                             View Profile
+                        </button>
+                        <button class="px-4 py-2 font-medium text-white transition-all duration-200 bg-red-600 rounded-lg opacity-85 hover:bg-red-700"
+                                onclick="confirmUnfriend(${friend.id}, '${fullName}')"
+                                title="Remove Friend">
+                            Remove
                         </button>
                     </div>
                 </div>
@@ -802,7 +844,7 @@
         const fullName = `${sender.firstName} ${sender.lastName}`;
         const profileImage = sender.profilePicture && sender.profilePicture.trim() !== '' ?
             sender.profilePicture : 
-            getDefaultAvatar();
+            getDefaultAvatar(fullName);
         const timeAgo = getTimeAgo(request.createdAt);
 
         return `
@@ -815,15 +857,15 @@
                         <p class="mt-1 text-xs text-gray-500">${timeAgo}</p>
                     </div>
                     <div class="flex space-x-3">
-                        <button class="px-4 py-2 text-white transition-colors rounded-lg bg-brand-600 hover:bg-brand-700"
+                        <button class="px-4 py-2 text-white transition-colors rounded-lg shadow-lg bg-brand-600 hover:bg-brand-700"
                                 onclick="acceptFriendRequest(${request.id})">
                             Accept
                         </button>
-                        <button class="px-4 py-2 text-gray-700 transition-colors bg-gray-200 rounded-lg hover:bg-gray-300"
+                        <button class="px-4 py-2 text-white transition-colors bg-red-500 rounded-lg shadow-lg hover:bg-red-600"
                                 onclick="declineFriendRequest(${request.id})">
                             Decline
                         </button>
-                        <button class="px-4 py-2 text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700"
+                        <button class="px-4 py-2 font-semibold transition-colors border-2 rounded-lg shadow-lg bg-brand-100 border-brand-600 text-brand-600 hover:bg-brand-200"
                                 onclick="viewProfile(${sender.id})">
                             View Profile
                         </button>
@@ -839,7 +881,7 @@
         const fullName = `${receiver.firstName} ${receiver.lastName}`;
         const profileImage = receiver.profilePicture && receiver.profilePicture.trim() !== '' ?
             receiver.profilePicture : 
-            getDefaultAvatar();
+            getDefaultAvatar(fullName);
         const timeAgo = getTimeAgo(request.createdAt);
 
         return `
@@ -852,7 +894,7 @@
                         <p class="mt-1 text-xs text-gray-500">Sent ${timeAgo}</p>
                     </div>
                     <div class="flex space-x-3">
-                        <button class="px-4 py-2 text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700"
+                        <button class="px-4 py-2 text-white transition-colors bg-red-500 rounded-lg shadow-lg hover:bg-red-600 opacity-85"
                                 onclick="cancelFriendRequest(${request.id})">
                             Cancel Request
                         </button>
@@ -988,9 +1030,9 @@
 
             if (response.ok) {
                 // Update the button text and style
-                button.textContent = 'Request Sent';
+                button.textContent = 'Request sent';
                 button.classList.remove('bg-brand-600', 'hover:bg-brand-700');
-                button.classList.add('bg-gray-100', 'cursor-not-allowed');
+                button.classList.add('bg-green-500', 'text-white');
                 button.disabled = true;
                 
                 // Show success message
@@ -1049,13 +1091,14 @@
         const modal = document.getElementById('profileModal');
         
         // Populate modal with user data
-        document.getElementById('modalFullName').textContent = `${user.firstName} ${user.lastName}`;
+        const fullName = `${user.firstName} ${user.lastName}`;
+        document.getElementById('modalFullName').textContent = fullName;
         document.getElementById('modalEmail').textContent = user.email;
         
         // Profile image
         const profileImage = user.profilePicture && user.profilePicture.trim() !== '' ? 
             user.profilePicture : 
-            getDefaultAvatar();
+            getDefaultAvatar(fullName);
         document.getElementById('modalProfileImage').src = profileImage;
         
         // Location
@@ -1108,6 +1151,59 @@
             });
         } catch (error) {
             return dateString;
+        }
+    }
+
+    // Function to show unfriend confirmation modal
+    function confirmUnfriend(friendId, friendName) {
+        const modal = document.getElementById('unfriendModal');
+        const nameSpan = document.getElementById('unfriendName');
+        const confirmBtn = document.getElementById('confirmUnfriendBtn');
+        
+        nameSpan.textContent = friendName;
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        
+        // Set up the confirm button with the friend ID
+        confirmBtn.onclick = () => unfriendUser(friendId, friendName);
+    }
+
+    // Function to close unfriend modal
+    function closeUnfriendModal() {
+        const modal = document.getElementById('unfriendModal');
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    // Function to unfriend a user
+    async function unfriendUser(friendId, friendName) {
+        try {
+            const response = await fetch(`/api/friends/unfriend/${friendId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                showNotification(`${friendName} has been removed from your friends list`, 'success');
+                closeUnfriendModal();
+                
+                // Refresh the friends list and stats
+                loadFriends(0);
+                loadFriendStats();
+                
+                // If we're on the user directory, refresh it to show the unfriended user
+                const currentSection = document.querySelector('.nav-link.active')?.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+                if (currentSection === 'user-directory') {
+                    loadUsersPage(0);
+                }
+            } else {
+                const errorText = await response.text();
+                showNotification(errorText || 'Failed to remove friend', 'error');
+                closeUnfriendModal();
+            }
+        } catch (error) {
+            console.error('Error removing friend:', error);
+            showNotification('Error removing friend', 'error');
+            closeUnfriendModal();
         }
     }
 
@@ -1223,9 +1319,9 @@
 
         // Handle Add Friend buttons that don't have onclick handlers
         if (e.target.textContent === 'Add Friend' && !e.target.hasAttribute('onclick')) {
-            e.target.textContent = 'Request Sent';
+            e.target.textContent = 'Request sent';
             e.target.classList.remove('bg-brand-600', 'hover:bg-brand-700');
-            e.target.classList.add('bg-gray-400', 'cursor-not-allowed');
+            e.target.classList.add('bg-green-500', 'text-white');
             e.target.disabled = true;
         }
     });
@@ -1280,6 +1376,16 @@
         document.getElementById('profileModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeProfileModal();
+            }
+        });
+
+        // Unfriend modal event listeners
+        document.getElementById('cancelUnfriend').addEventListener('click', closeUnfriendModal);
+        
+        // Close unfriend modal when clicking outside
+        document.getElementById('unfriendModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeUnfriendModal();
             }
         });
 
