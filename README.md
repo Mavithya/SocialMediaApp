@@ -1,4 +1,4 @@
-🌐 Socialite – A Full-Stack Social Media Web Application
+🌐 **Socialite – A Full-Stack Social Media Web Application**
 
 Socialite is a lightweight, full-stack social media platform that we designed and developed as a collaborative team project.
 Our goal was to create a modern, secure, and scalable web application where users can connect, share, and interact seamlessly.
@@ -21,9 +21,50 @@ Our goal was to create a modern, secure, and scalable web application where user
 -  **Other Tools**: Maven, Git & GitHub, Flyway  
 
 
-🏗️ Architecture
-The application follows a classic MVC (Model–View–Controller) architecture, ensuring:
+🏗️ **Architecture**
 
-✅ Clean separation of concerns
-✅ Better maintainability
-✅ Scalability for future enhancements
+The application follows a classic **MVC (Model–View–Controller)** architecture, ensuring:  
+
+-  **Clean separation of concerns**  
+-  **Better maintainability**  
+-  **Scalability for future enhancements**
+
+
+## 🚀 Getting Started
+
+### Prerequisites
+Make sure you have the following installed:
+- Java 17+
+- Maven
+- PostgreSQL
+
+### Setup Instructions
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-org/socialite.git
+   cd socialite
+   
+2. Configure the database connection in:
+   ```bash
+   src/main/resources/application.properties
+
+3. Run the application: 
+   ```bash
+   mvn spring-boot:run
+
+4. Access the app at:
+   ```bash
+   http://localhost:8080
+
+
+## 📸 Demo
+
+👉 [Watch the demo video here](https://your-demo-video-link.com](https://drive.google.com/drive/folders/1z_WefvMz_K7WpUqVG3WmDsAyJNb9Eic4?usp=share_link)
+
+   
+  
+
+
+   
+  
+
